@@ -1,0 +1,116 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: openfloat-core
+
+  # ── JPA / Hibernate ──────────────────────────────────────────────────
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+
+  # ── PostgreSQL ───────────────────────────────────────────────────────
+  datasource:
+    url: jdbc:postgresql://localhost:5432/openfloat_mpesa
+    username: openfloat
+    password: openfloat_dev_2024
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      max-lifetime: 600000
+      connection-timeout: 20000
+
+  # ── Flyway ───────────────────────────────────────────────────────────
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  # ── Redis ────────────────────────────────────────────────────────────
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 5000ms
+
+  # ── RabbitMQ ─────────────────────────────────────────────────────────
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: openfloat
+    password: openfloat_dev_2024
+    virtual-host: /
+
+  # ── Jackson ──────────────────────────────────────────────────────────
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+    default-property-inclusion: non_null
+
+# ── OpenAPI / Swagger ────────────────────────────────────────────────────
+springdoc:
+  api-docs:
+    path: /openapi.json
+  swagger-ui:
+    path: /swagger
+    tags-sorter: alpha
+    operations-sorter: alpha
+    doc-expansion: none
+
+# ── Actuator ─────────────────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# ── Application Config ───────────────────────────────────────────────────
+openfloat:
+  encryption:
+    # Base64-encoded 256-bit AES key — OVERRIDE IN PRODUCTION via env var
+    key: ${OPENFLOAT_ENCRYPTION_KEY:dGhpc19pc19hX2Rldl9rZXlfcGxlYXNlX2NoYW5nZV9tZQ==}
+
+  mpesa:
+    daraja:
+      base-url: https://sandbox.safaricom.co.ke
+      consumer-key: ${MPESA_CONSUMER_KEY:sandbox_consumer_key}
+      consumer-secret: ${MPESA_CONSUMER_SECRET:sandbox_consumer_secret}
+      passkey: ${MPESA_PASSKEY:sandbox_passkey}
+      shortcode: ${MPESA_SHORTCODE:174379}
+      callback-base-url: ${MPESA_CALLBACK_BASE_URL:https://your-domain.com}
+
+  rate-limit:
+    requests-per-minute: 100
+    window-seconds: 60
+
+# ── Logging ──────────────────────────────────────────────────────────────
+logging:
+  level:
+    root: INFO
+    com.openfloat.mpesa: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

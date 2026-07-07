@@ -1,0 +1,12 @@
+spring:
+  # ── Dev Profile Overrides ────────────────────────────────────────────
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+logging:
+  level:
+    com.openfloat.mpesa: DEBUG
+    org.springframework.web: DEBUG

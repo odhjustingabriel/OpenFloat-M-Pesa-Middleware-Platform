@@ -1,0 +1,38 @@
+# Maven
+target/
+*.class
+*.jar
+*.war
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+*.env.local
+
+# Node (Staff Portal)
+node_modules/
+dist/
+build/
+.cache/
+
+# Docker volumes
+postgres_data/
+redis_data/
+rabbitmq_data/

@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: openfloat-postgres
+    environment:
+      POSTGRES_DB: openfloat_mpesa
+      POSTGRES_USER: openfloat
+      POSTGRES_PASSWORD: openfloat_dev_2024
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openfloat -d openfloat_mpesa"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - openfloat-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: openfloat-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - openfloat-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: openfloat-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: openfloat
+      RABBITMQ_DEFAULT_PASS: openfloat_dev_2024
+    ports:
+      - "5672:5672"    # AMQP
+      - "15672:15672"  # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    networks:
+      - openfloat-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+
+networks:
+  openfloat-network:
+    driver: bridge

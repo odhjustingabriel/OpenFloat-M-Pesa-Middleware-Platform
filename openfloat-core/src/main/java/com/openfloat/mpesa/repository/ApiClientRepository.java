@@ -1,0 +1,19 @@
+package com.openfloat.mpesa.repository;
+
+import com.openfloat.mpesa.entity.ApiClient;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+import java.util.UUID;
+
+/**
+ * Repository for ApiClient entity.
+ */
+@Repository
+public interface ApiClientRepository extends JpaRepository<ApiClient, UUID> {
+
+    Optional<ApiClient> findByClientId(String clientId);
+
+    boolean existsByClientId(String clientId);
+}
