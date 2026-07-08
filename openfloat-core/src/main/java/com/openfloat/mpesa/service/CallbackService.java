@@ -2,18 +2,17 @@ package com.openfloat.mpesa.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openfloat.mpesa.common.event.TransactionCompletedEvent;
-import com.openfloat.mpesa.config.RabbitMQConfig;
 import com.openfloat.mpesa.entity.Callback;
 import com.openfloat.mpesa.entity.Transaction;
 import com.openfloat.mpesa.entity.enums.TransactionStatus;
 import com.openfloat.mpesa.entity.enums.TransactionType;
+import com.openfloat.mpesa.event.TransactionEventPublisher;
 import com.openfloat.mpesa.mapper.CallbackMapper;
 import com.openfloat.mpesa.mapper.TransactionMapper;
 import com.openfloat.mpesa.repository.CallbackRepository;
 import com.openfloat.mpesa.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +27,7 @@ public class CallbackService {
 
     private final TransactionRepository transactionRepository;
     private final CallbackRepository callbackRepository;
-    private final RabbitTemplate rabbitTemplate;
+    private final TransactionEventPublisher eventPublisher;
     private final TransactionMapper transactionMapper;
     private final CallbackMapper callbackMapper;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -311,16 +310,7 @@ public class CallbackService {
     }
 
     private void publishTransactionCompleted(Transaction transaction) {
-        try {
-            TransactionCompletedEvent event = transactionMapper.toEvent(transaction);
-            log.info("Publishing TransactionCompletedEvent for txn: {}", event.getTransactionId());
-            rabbitTemplate.convertAndSend(
-                    RabbitMQConfig.TRANSACTION_EXCHANGE,
-                    RabbitMQConfig.TRANSACTION_ROUTING_KEY,
-                    event
-            );
-        } catch (Exception e) {
-            log.error("Failed to publish TransactionCompletedEvent to RabbitMQ: {}", e.getMessage(), e);
-        }
+        TransactionCompletedEvent event = transactionMapper.toEvent(transaction);
+        eventPublisher.publish(event);
     }
 }

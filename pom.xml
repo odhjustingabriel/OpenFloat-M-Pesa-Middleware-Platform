@@ -23,6 +23,7 @@
         <module>openfloat-common</module>
         <module>openfloat-core</module>
         <module>openfloat-auth</module>
+        <module>openfloat-erp-connector</module>
     </modules>
 
     <properties>
@@ -60,6 +61,11 @@
             <dependency>
                 <groupId>com.openfloat</groupId>
                 <artifactId>openfloat-auth</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.openfloat</groupId>
+                <artifactId>openfloat-erp-connector</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

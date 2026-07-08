@@ -1,0 +1,83 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: openfloat-erp-connector
+
+  # ── JPA / Hibernate ──────────────────────────────────────────────────
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+
+  # ── PostgreSQL (shared database) ─────────────────────────────────────
+  datasource:
+    url: jdbc:postgresql://localhost:5432/openfloat_mpesa
+    username: openfloat
+    password: openfloat_dev_2024
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      idle-timeout: 300000
+      max-lifetime: 600000
+      connection-timeout: 20000
+
+  # ── Flyway ───────────────────────────────────────────────────────────
+  flyway:
+    enabled: false
+
+  # ── RabbitMQ ─────────────────────────────────────────────────────────
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: openfloat
+    password: openfloat_dev_2024
+    virtual-host: /
+    listener:
+      simple:
+        acknowledge-mode: auto
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          initial-interval: 60000      # 1 minute
+          multiplier: 5.0              # 1m → 5m → 25m (capped at max)
+          max-interval: 1800000        # 30 minutes
+          max-attempts: 5              # 5 attempts before DLQ
+        concurrency: 2
+        max-concurrency: 5
+
+# ── ERP Adapter Configuration ────────────────────────────────────────
+openfloat:
+  erp:
+    active-adapter: custom   # custom | sap | oracle | dynamics
+    sap:
+      base-url: https://sap.example.com/api
+      client-id: sap-client
+      client-secret: sap-secret
+    oracle:
+      base-url: https://oracle.example.com/api
+      api-key: oracle-api-key
+    dynamics:
+      base-url: https://dynamics.example.com/api
+      tenant-id: dynamics-tenant
+      client-id: dynamics-client
+      client-secret: dynamics-secret
+    custom:
+      base-url: http://localhost:9090/api/erp
+      api-key: custom-dev-key
+
+logging:
+  level:
+    root: INFO
+    com.openfloat.mpesa.erp: DEBUG
+    org.springframework.amqp: INFO
