@@ -4,7 +4,7 @@
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.x-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
 [![RabbitMQ](https://img.shields.io/badge/RabbitMQ-3-orange.svg)](https://www.rabbitmq.com/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
 
 An enterprise-grade, high-performance, and secure middleware platform that abstracts Safaricom's M-Pesa Daraja APIs. It provides unified REST APIs, robust callback ingestion, real-time event-driven ERP synchronization, comprehensive security, and transaction reconciliation.
 
@@ -212,7 +212,7 @@ mvn verify -Pintegration-test
 mvn jacoco:report
 ```
 
----
-
 ## License
-Distributed under the MIT License. See [LICENSE](LICENSE) for details.
+Copyright (c) 2026 OpenFloat M-Pesa Middleware Platform. All rights reserved. 
+
+This software and its documentation are confidential and proprietary. See [LICENSE](LICENSE) for full licensing terms and restrictions.
