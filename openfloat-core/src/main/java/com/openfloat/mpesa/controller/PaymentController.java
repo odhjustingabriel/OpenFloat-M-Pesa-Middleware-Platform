@@ -1,5 +1,7 @@
 package com.openfloat.mpesa.controller;
 
+import com.openfloat.mpesa.audit.Audit;
+import com.openfloat.mpesa.audit.AuditEventType;
 import com.openfloat.mpesa.common.dto.ApiResponse;
 import com.openfloat.mpesa.dto.StkPushRequestDto;
 import com.openfloat.mpesa.dto.StkPushResponseDto;
@@ -33,6 +35,7 @@ public class PaymentController {
 
     @PostMapping("/stk-push")
     @Operation(summary = "Initiate Lipa na M-Pesa Online STK Push Prompt")
+    @Audit(action = AuditEventType.PAYMENT_INITIATED, resource = "STK_PUSH")
     public ResponseEntity<ApiResponse<StkPushResponseDto>> initiateStkPush(
             @Valid @RequestBody StkPushRequestDto requestDto) {
         log.info("Received STK Push API request for {}", requestDto.getMsisdn());
@@ -42,6 +45,7 @@ public class PaymentController {
 
     @PostMapping("/b2c")
     @Operation(summary = "Disburse funds from Business Shortcode to Customer Mobile Wallet")
+    @Audit(action = AuditEventType.PAYMENT_INITIATED, resource = "B2C")
     public ResponseEntity<ApiResponse<Map<String, Object>>> initiateB2c(
             @RequestParam String phoneNumber,
             @RequestParam BigDecimal amount,
@@ -58,6 +62,7 @@ public class PaymentController {
 
     @PostMapping("/reversal")
     @Operation(summary = "Initiate reversal of an erroneous transaction")
+    @Audit(action = AuditEventType.PAYMENT_INITIATED, resource = "REVERSAL")
     public ResponseEntity<ApiResponse<Map<String, Object>>> initiateReversal(
             @RequestParam String transactionId,
             @RequestParam(required = false, defaultValue = "Erroneous Payment Reversal") String remarks) {
@@ -71,6 +76,7 @@ public class PaymentController {
 
     @PostMapping("/c2b/register-urls")
     @Operation(summary = "Register C2B Confirmation and Validation URLs with Safaricom")
+    @Audit(action = AuditEventType.CONFIG_CHANGE, resource = "C2B_URL_REGISTRATION")
     public ResponseEntity<ApiResponse<Map<String, Object>>> registerC2bUrls() {
         log.info("Received request to register C2B validation and confirmation URLs");
         c2bService.registerUrls();
@@ -82,6 +88,7 @@ public class PaymentController {
 
     @PostMapping("/c2b/simulate")
     @Operation(summary = "Simulate C2B payment transaction (Sandbox only)")
+    @Audit(action = AuditEventType.PAYMENT_INITIATED, resource = "C2B_SIMULATION")
     public ResponseEntity<ApiResponse<Map<String, Object>>> simulateC2bPayment(
             @RequestParam String phoneNumber,
             @RequestParam BigDecimal amount,

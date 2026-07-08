@@ -1,0 +1,46 @@
+server:
+  port: 8081
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: openfloat-auth
+
+  # ── JPA / Hibernate ──────────────────────────────────────────────────
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+
+  # ── PostgreSQL ───────────────────────────────────────────────────────
+  datasource:
+    url: jdbc:postgresql://localhost:5432/openfloat_mpesa
+    username: openfloat
+    password: openfloat_dev_2024
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 300000
+      max-lifetime: 600000
+      connection-timeout: 20000
+
+# ── LDAP Settings ────────────────────────────────────────────────────────
+openfloat:
+  ldap:
+    enabled: false
+    domain: example.com
+    url: ldap://localhost:389
+
+logging:
+  level:
+    root: INFO
+    com.openfloat.mpesa.auth: DEBUG
+    org.springframework.security: DEBUG
