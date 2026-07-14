@@ -4,6 +4,8 @@ import com.openfloat.mpesa.common.event.TransactionCompletedEvent;
 import com.openfloat.mpesa.erp.adapter.ERPAdapter;
 import com.openfloat.mpesa.erp.entity.ERPSyncRecord;
 import com.openfloat.mpesa.erp.repository.ERPSyncRecordRepository;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +28,7 @@ public class ERPDispatchService {
 
     private final List<ERPAdapter> adapters;
     private final ERPSyncRecordRepository syncRecordRepository;
+    private final MeterRegistry meterRegistry;
 
     /**
      * Dispatches a transaction event to the active ERP adapter.
@@ -73,6 +76,7 @@ public class ERPDispatchService {
             syncRecord.setSyncedAt(Instant.now());
             syncRecord.setErrorMessage(null);
             syncRecordRepository.save(syncRecord);
+            incrementCounter("erp.sync.success.count");
             
             log.info("Successfully completed ERP sync for transaction {}", event.getTransactionId());
         } catch (Exception e) {
@@ -83,9 +87,18 @@ public class ERPDispatchService {
             syncRecord.setSyncStatus("FAILED");
             syncRecord.setErrorMessage(e.getMessage());
             syncRecordRepository.save(syncRecord);
+            incrementCounter("erp.sync.failure.count");
 
             // Re-throw so caller (Amqp consumer) can coordinate retry policies
             throw e;
         }
+    }
+
+    private void incrementCounter(String metricName) {
+        Counter.builder(metricName)
+                .description("ERP synchronization outcome counter")
+                .tag("erp.system", activeAdapterName)
+                .register(meterRegistry)
+                .increment();
     }
 }

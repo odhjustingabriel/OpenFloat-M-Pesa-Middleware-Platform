@@ -11,6 +11,8 @@ import com.openfloat.mpesa.mapper.CallbackMapper;
 import com.openfloat.mpesa.mapper.TransactionMapper;
 import com.openfloat.mpesa.repository.CallbackRepository;
 import com.openfloat.mpesa.repository.TransactionRepository;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,7 @@ public class CallbackService {
     private final TransactionEventPublisher eventPublisher;
     private final TransactionMapper transactionMapper;
     private final CallbackMapper callbackMapper;
+    private final MeterRegistry meterRegistry;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
@@ -39,6 +42,7 @@ public class CallbackService {
     @Transactional
     public void processStkCallback(Map<String, Object> payload) {
         log.info("Processing STK Callback payload");
+        Timer.Sample sample = Timer.start(meterRegistry);
         try {
             Map<String, Object> body = (Map<String, Object>) payload.get("Body");
             Map<String, Object> stkCallback = (Map<String, Object>) body.get("stkCallback");
@@ -107,6 +111,8 @@ public class CallbackService {
         } catch (Exception e) {
             log.error("Failed to parse and process STK Callback: {}", e.getMessage(), e);
             throw new IllegalArgumentException("Invalid STK callback payload structure", e);
+        } finally {
+            recordCallbackProcessingTime("STK", sample);
         }
     }
 
@@ -175,6 +181,7 @@ public class CallbackService {
     @Transactional
     public void processB2cCallback(Map<String, Object> payload) {
         log.info("Processing B2C Callback");
+        Timer.Sample sample = Timer.start(meterRegistry);
         try {
             Map<String, Object> result = (Map<String, Object>) payload.get("Result");
             String conversationId = (String) result.get("ConversationID");
@@ -239,6 +246,8 @@ public class CallbackService {
         } catch (Exception e) {
             log.error("Failed to parse and process B2C Callback: {}", e.getMessage(), e);
             throw new IllegalArgumentException("Invalid B2C callback payload structure", e);
+        } finally {
+            recordCallbackProcessingTime("B2C", sample);
         }
     }
 
@@ -311,7 +320,16 @@ public class CallbackService {
         } catch (Exception e) {
             log.error("Failed to parse and process Reversal Callback: {}", e.getMessage(), e);
             throw new IllegalArgumentException("Invalid Reversal callback payload structure", e);
+        } finally {
+            recordCallbackProcessingTime("REVERSAL", sample);
         }
+    }
+
+    private void recordCallbackProcessingTime(String callbackType, Timer.Sample sample) {
+        sample.stop(Timer.builder("payment.callback.processing.time")
+                .description("Callback processing latency")
+                .tag("callback.type", callbackType)
+                .register(meterRegistry));
     }
 
     private void publishTransactionCompleted(Transaction transaction) {

@@ -11,6 +11,8 @@ import com.openfloat.mpesa.integration.mpesa.DarajaClient;
 import com.openfloat.mpesa.integration.mpesa.DarajaConfig;
 import com.openfloat.mpesa.integration.mpesa.dto.StkPushRequest;
 import com.openfloat.mpesa.integration.mpesa.dto.StkPushResponse;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ public class StkPushService {
     private final DarajaConfig darajaConfig;
     private final TransactionService transactionService;
     private final IdempotencyService idempotencyService;
+    private final MeterRegistry meterRegistry;
 
     @Transactional
     public StkPushResponseDto initiateStkPush(StkPushRequestDto requestDto) {
@@ -84,6 +87,11 @@ public class StkPushService {
         try {
             // 5. Send Request to Daraja
             StkPushResponse stkResponse = darajaClient.initiateStkPush(stkRequest);
+
+            Counter.builder("payment.stk.initiated.count")
+                    .description("Number of STK Push initiation requests accepted by Daraja")
+                    .register(meterRegistry)
+                    .increment();
 
             // 6. Update Transaction details with Daraja API Request Identifiers
             transaction.setMerchantRequestId(stkResponse.getMerchantRequestId());

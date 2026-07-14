@@ -3,6 +3,8 @@ package com.openfloat.mpesa.erp.listener;
 import com.openfloat.mpesa.common.event.TransactionCompletedEvent;
 import com.openfloat.mpesa.erp.config.AmqpConfig;
 import com.openfloat.mpesa.erp.service.ERPDispatchService;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Component;
 public class TransactionEventConsumer {
 
     private final ERPDispatchService erpDispatchService;
+    private final MeterRegistry meterRegistry;
 
     /**
      * Primary listener on the main ERP sync queue.
@@ -62,6 +65,11 @@ public class TransactionEventConsumer {
     public void onDeadLetterMessage(
             TransactionCompletedEvent event,
             @Header(value = "x-death", required = false) Object xDeath) {
+
+        Counter.builder("erp.dlq.messages.count")
+                .description("Number of ERP synchronization messages received on the DLQ")
+                .register(meterRegistry)
+                .increment();
 
         log.error(
                 "ALERT: ERP_DLQ — Transaction has exhausted all retry attempts and landed in DLQ. " +

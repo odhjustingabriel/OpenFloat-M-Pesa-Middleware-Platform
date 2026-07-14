@@ -8,6 +8,8 @@ import com.openfloat.mpesa.integration.mpesa.DarajaConfig;
 import com.openfloat.mpesa.integration.mpesa.dto.StkQueryRequest;
 import com.openfloat.mpesa.integration.mpesa.dto.StkQueryResponse;
 import com.openfloat.mpesa.repository.TransactionRepository;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -59,6 +61,7 @@ public class ReconciliationScheduler {
     private final TransactionRepository transactionRepository;
     private final DarajaClient          darajaClient;
     private final DarajaConfig          darajaConfig;
+    private final MeterRegistry         meterRegistry;
 
     /**
      * Runs every night at 02:00 UTC.
@@ -86,8 +89,14 @@ public class ReconciliationScheduler {
             try {
                 ReconciliationOutcome outcome = reconcileTransaction(transaction);
                 switch (outcome) {
-                    case MATCHED    -> matched++;
-                    case MISMATCHED -> mismatched++;
+                    case MATCHED    -> {
+                        matched++;
+                        incrementCounter("reconciliation.matched.count");
+                    }
+                    case MISMATCHED -> {
+                        mismatched++;
+                        incrementCounter("reconciliation.mismatched.count");
+                    }
                     case IN_PROGRESS -> inProgress++;
                 }
             } catch (Exception e) {
@@ -99,6 +108,13 @@ public class ReconciliationScheduler {
 
         log.info("RECONCILIATION — Completed. total={} matched={} mismatched={} inProgress={} errors={}",
                 candidates.size(), matched, mismatched, inProgress, errors);
+    }
+
+    private void incrementCounter(String metricName) {
+        Counter.builder(metricName)
+                .description("Nightly reconciliation outcome counter")
+                .register(meterRegistry)
+                .increment();
     }
 
     // ── Private helpers ───────────────────────────────────────────────────
