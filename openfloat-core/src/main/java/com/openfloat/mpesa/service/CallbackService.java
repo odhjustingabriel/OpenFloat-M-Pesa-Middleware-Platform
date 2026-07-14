@@ -257,6 +257,7 @@ public class CallbackService {
     @Transactional
     public void processReversalCallback(Map<String, Object> payload) {
         log.info("Processing Reversal Callback");
+        Timer.Sample sample = Timer.start(meterRegistry);
         try {
             Map<String, Object> result = (Map<String, Object>) payload.get("Result");
             String conversationId = (String) result.get("ConversationID");
