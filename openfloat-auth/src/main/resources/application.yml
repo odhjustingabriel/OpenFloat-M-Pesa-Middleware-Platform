@@ -32,6 +32,22 @@ spring:
       max-lifetime: 600000
       connection-timeout: 20000
 
+# ── Actuator / Prometheus ────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: openfloat-auth
+
 # ── LDAP Settings ────────────────────────────────────────────────────────
 openfloat:
   ldap:

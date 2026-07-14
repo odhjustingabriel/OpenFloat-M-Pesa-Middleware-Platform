@@ -84,6 +84,8 @@ management:
     export:
       prometheus:
         enabled: true
+    tags:
+      application: openfloat-core
 
 # ── Application Config ───────────────────────────────────────────────────
 openfloat:

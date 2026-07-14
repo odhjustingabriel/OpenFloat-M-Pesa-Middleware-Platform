@@ -6,6 +6,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -28,6 +30,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     private final RateLimitConfig rateLimitConfig;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final MeterRegistry meterRegistry;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final String REDIS_RATE_LIMIT_PREFIX = "ratelimit:";
@@ -58,6 +61,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
             if (count != null && count > rateLimitConfig.getRequestsPerMinute()) {
                 log.warn("Rate limit exceeded for client: {}. Count: {}", clientId, count);
+                Counter.builder("rate.limit.rejected.count")
+                        .description("Number of requests rejected by the rate limiter")
+                        .register(meterRegistry)
+                        .increment();
                 writeErrorResponse(request, response, clientId);
                 return;
             }

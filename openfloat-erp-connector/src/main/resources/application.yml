@@ -56,6 +56,22 @@ spring:
         concurrency: 2
         max-concurrency: 5
 
+# ── Actuator / Prometheus ────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: openfloat-erp-connector
+
 # ── ERP Adapter Configuration ────────────────────────────────────────
 openfloat:
   erp:

@@ -1,0 +1,14 @@
+{
+  "uid": "openfloat-overview",
+  "title": "OpenFloat M-Pesa Overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "15s",
+  "panels": [
+    {"type":"timeseries","title":"STK Push requests/minute","gridPos":{"x":0,"y":0,"w":12,"h":8},"targets":[{"expr":"sum(rate(payment_stk_initiated_count_total[1m])) * 60","legendFormat":"STK/min"}]},
+    {"type":"timeseries","title":"Callback processing latency p50/p95/p99","gridPos":{"x":12,"y":0,"w":12,"h":8},"targets":[{"expr":"histogram_quantile(0.50, sum(rate(payment_callback_processing_time_seconds_bucket[5m])) by (le))","legendFormat":"p50"},{"expr":"histogram_quantile(0.95, sum(rate(payment_callback_processing_time_seconds_bucket[5m])) by (le))","legendFormat":"p95"},{"expr":"histogram_quantile(0.99, sum(rate(payment_callback_processing_time_seconds_bucket[5m])) by (le))","legendFormat":"p99"}]},
+    {"type":"timeseries","title":"ERP sync success/failure rate","gridPos":{"x":0,"y":8,"w":12,"h":8},"targets":[{"expr":"sum(rate(erp_sync_success_count_total[5m]))","legendFormat":"success"},{"expr":"sum(rate(erp_sync_failure_count_total[5m]))","legendFormat":"failure"}]},
+    {"type":"timeseries","title":"Rate limit rejections","gridPos":{"x":12,"y":8,"w":12,"h":8},"targets":[{"expr":"sum(rate(rate_limit_rejected_count_total[5m]))","legendFormat":"rejections"}]},
+    {"type":"timeseries","title":"Reconciliation job outcomes","gridPos":{"x":0,"y":16,"w":24,"h":8},"targets":[{"expr":"sum(increase(reconciliation_matched_count_total[24h]))","legendFormat":"matched"},{"expr":"sum(increase(reconciliation_mismatched_count_total[24h]))","legendFormat":"mismatched"}]}
+  ]
+}

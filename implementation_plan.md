@@ -1,6 +1,6 @@
 # OpenFloat M-Pesa Middleware Platform — Implementation Plan (Updated)
 
-> **Last Updated:** 2026-07-14 | **Progress:** Phases 1–4 ✅ Complete · Phases 5–7 ⬜ Pending
+> **Last Updated:** 2026-07-14 | **Progress:** Phases 1–4 ✅ Complete · Phase 5 🟨 In Progress · Phases 6–7 ⬜ Pending
 
 ---
 
@@ -20,9 +20,9 @@ The platform is a multi-module Java/Spring Boot 3.3 Maven monorepo targeting Saf
 | `openfloat-erp-connector` | ✅ Complete | 100% | All adapters complete, DLX/DLQ topology, retry TTL, DLQ alert listener |
 | `openfloat-gateway` | ❌ Not Started | 0% | Spring Cloud Gateway module not created |
 | `openfloat-staff-portal` | ❌ Not Started | 0% | React SPA not created |
-| Test suites | ❌ Not Started | 0% | No unit or integration test classes exist |
+| Test suites | 🟨 In Progress | 25% | Unit coverage added for STK Push and ERP dispatch; remaining unit and Testcontainers suites pending |
 | Kubernetes / Helm | ❌ Not Started | 0% | No K8s manifests |
-| Observability stack | ❌ Not Started | 0% | No Prometheus/Grafana config |
+| Observability stack | ✅ Complete | 100% | Prometheus scrape config, Grafana provisioning/dashboard, app metric tags, and custom Micrometer metrics added |
 
 ---
 
@@ -88,13 +88,13 @@ The platform is a multi-module Java/Spring Boot 3.3 Maven monorepo targeting Saf
 
 ---
 
-## ⬜ Phase 5 — Testing & Observability (Current Focus)
+## 🟨 Phase 5 — Testing & Observability (Current Focus)
 
 **Goal:** 80%+ code coverage, all happy-path and error-path scenarios tested; Prometheus metrics scraped; dashboards provisioned.
 
 ### Unit Tests
 
-#### [NEW] `openfloat-core/src/test/.../service/StkPushServiceTest.java`
+#### [DONE] `openfloat-core/src/test/.../service/StkPushServiceTest.java`
 - Mock `DarajaClient`, `TransactionRepository`, `IdempotencyService`.
 - Test: happy path, Daraja error, duplicate idempotency key.
 
@@ -108,7 +108,7 @@ The platform is a multi-module Java/Spring Boot 3.3 Maven monorepo targeting Saf
 #### [NEW] `openfloat-auth/src/test/.../service/JpaRegisteredClientRepositoryTest.java`
 - Verify client credentials flow produces a valid JWT with correct `role` claim.
 
-#### [NEW] `openfloat-erp-connector/src/test/.../service/ERPDispatchServiceTest.java`
+#### [DONE] `openfloat-erp-connector/src/test/.../service/ERPDispatchServiceTest.java`
 - Test adapter routing by `erp.adapter.type` for all four adapters.
 - Test retry count increments on repeated failure.
 
@@ -131,7 +131,7 @@ The platform is a multi-module Java/Spring Boot 3.3 Maven monorepo targeting Saf
 
 ### Observability
 
-#### `openfloat-core/src/main/resources/application.yml` additions
+#### `openfloat-core/src/main/resources/application.yml` additions ✅
 ```yaml
 management:
   metrics:
@@ -140,7 +140,7 @@ management:
 ```
 _(Prometheus endpoint already enabled in existing config)_
 
-#### `docker-compose.yml` additions
+#### `docker-compose.yml` additions ✅
 - Add **Prometheus** (scraping `:8080/actuator/prometheus`, `:8081/actuator/prometheus`, `:8082/actuator/prometheus`).
 - Add **Grafana** with auto-provisioned dashboard JSON for:
   - STK Push requests/minute
@@ -149,7 +149,7 @@ _(Prometheus endpoint already enabled in existing config)_
   - Rate limit rejections
   - Reconciliation job outcomes
 
-#### Custom Micrometer Metrics (add to services)
+#### Custom Micrometer Metrics (added to services) ✅
 - `payment.stk.initiated.count` (Counter)
 - `payment.callback.processing.time` (Timer)
 - `erp.sync.success.count` / `erp.sync.failure.count` (Counter)
@@ -159,9 +159,9 @@ _(Prometheus endpoint already enabled in existing config)_
 
 ### Phase 5 Verification
 ```bash
-mvn test                         # Unit tests pass
-mvn verify -Pintegration-test    # Integration tests pass
-mvn jacoco:report                # Coverage ≥ 80%
+mvn test                         # Unit tests pass (requires Maven Central access)
+mvn verify -Pintegration-test    # Integration tests pass (pending Testcontainers suites)
+mvn jacoco:report                # Coverage report generation (requires dependency resolution)
 ```
 
 ---
