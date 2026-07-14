@@ -28,4 +28,12 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, UUID> {
      */
     @Query("SELECT a FROM AuditLog a ORDER BY a.timestamp DESC LIMIT 1")
     Optional<AuditLog> findLatest();
+
+    /**
+     * Returns the most recent audit log entry with a pessimistic write lock.
+     * Prevents race conditions when calculating chained hashes concurrently.
+     */
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT a FROM AuditLog a ORDER BY a.timestamp DESC LIMIT 1")
+    Optional<AuditLog> findLatestForUpdate();
 }

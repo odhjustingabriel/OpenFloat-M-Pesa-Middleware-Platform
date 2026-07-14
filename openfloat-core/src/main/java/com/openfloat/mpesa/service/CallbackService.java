@@ -81,6 +81,7 @@ public class CallbackService {
                         mpesaReceipt = (String) value;
                     }
                 }
+                transaction.setReconciliationId("REC-" + (mpesaReceipt != null ? mpesaReceipt : UUID.randomUUID().toString().substring(0, 8).toUpperCase()));
             } else {
                 transaction.setStatus(TransactionStatus.FAILED);
             }
@@ -150,6 +151,7 @@ public class CallbackService {
                 .status(TransactionStatus.SUCCESS)
                 .resultCode(0)
                 .resultDescription("C2B Payment Completed")
+                .reconciliationId("REC-" + transId)
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
                 .build();
@@ -214,6 +216,7 @@ public class CallbackService {
                         }
                     }
                 }
+                transaction.setReconciliationId("REC-" + (mpesaReceipt != null ? mpesaReceipt : UUID.randomUUID().toString().substring(0, 8).toUpperCase()));
             } else {
                 transaction.setStatus(TransactionStatus.FAILED);
             }
@@ -285,6 +288,7 @@ public class CallbackService {
                         }
                     }
                 }
+                transaction.setReconciliationId("REC-" + (mpesaReceipt != null ? mpesaReceipt : UUID.randomUUID().toString().substring(0, 8).toUpperCase()));
             } else {
                 transaction.setStatus(TransactionStatus.FAILED);
             }

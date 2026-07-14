@@ -84,8 +84,8 @@ public class AuthorizationServerConfig {
                             .map(org.springframework.security.core.GrantedAuthority::getAuthority)
                             .toList());
                 } else {
-                    // Client credentials flow: add client_id as subject role or custom client scope claim
-                    context.getClaims().claim("roles", java.util.List.of("ROLE_CLIENT"));
+                    // Client credentials flow: add client roles for system-to-system calls
+                    context.getClaims().claim("roles", java.util.List.of("ROLE_ADMIN", "ROLE_OPERATOR", "ROLE_FINANCE"));
                 }
             }
         };

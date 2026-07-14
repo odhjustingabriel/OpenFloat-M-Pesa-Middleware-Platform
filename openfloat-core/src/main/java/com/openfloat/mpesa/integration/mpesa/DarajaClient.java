@@ -60,6 +60,31 @@ public class DarajaClient {
                 log.error("API call to Daraja URL [{}] returned non-success code: {}", url, response.getStatusCode());
                 throw new IllegalStateException("API call to Daraja failed with status: " + response.getStatusCode());
             }
+        } catch (org.springframework.web.client.HttpClientErrorException.Unauthorized e) {
+            log.warn("Unauthorized (401) error calling Daraja URL [{}]. Evicting token and retrying...", url);
+            tokenManager.evictToken();
+            
+            // Retry once
+            String newToken = tokenManager.getAccessToken();
+            headers.set("Authorization", "Bearer " + newToken);
+            HttpEntity<T> retryEntity = new HttpEntity<>(body, headers);
+            
+            try {
+                ResponseEntity<R> response = restTemplate.exchange(
+                        url,
+                        HttpMethod.POST,
+                        retryEntity,
+                        responseType
+                );
+                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                    return response.getBody();
+                } else {
+                    throw new IllegalStateException("Retry calling Daraja failed with status: " + response.getStatusCode());
+                }
+            } catch (Exception retryEx) {
+                log.error("Retry call to Safaricom Daraja API URL [{}] failed: {}", url, retryEx.getMessage(), retryEx);
+                throw new IllegalStateException("Safaricom Daraja API call failed after token refresh: " + retryEx.getMessage(), retryEx);
+            }
         } catch (Exception e) {
             log.error("Failed to perform request to Safaricom Daraja API URL [{}]: {}", url, e.getMessage(), e);
             throw new IllegalStateException("Safaricom Daraja API call failed: " + e.getMessage(), e);

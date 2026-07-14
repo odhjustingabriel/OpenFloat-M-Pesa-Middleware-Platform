@@ -55,6 +55,15 @@ services:
     networks:
       - openfloat-network
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: openfloat-mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - openfloat-network
+
 volumes:
   postgres_data:
     driver: local

@@ -22,6 +22,13 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @org.springframework.web.bind.annotation.ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<Map<String, String>> handleDuplicateResource(
+            DuplicateResourceException ex, HttpServletRequest request) {
+        log.warn("Duplicate request detected at {}: {}", request.getRequestURI(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("status", "ALREADY_PROCESSED"));
+    }
+
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<ErrorResponse> handleBaseException(BaseException ex, HttpServletRequest request) {
         log.warn("Application exception [{}]: {}", ex.getErrorCode(), ex.getMessage());

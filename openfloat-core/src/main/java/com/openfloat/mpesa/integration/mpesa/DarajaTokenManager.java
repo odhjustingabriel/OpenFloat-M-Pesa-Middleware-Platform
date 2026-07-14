@@ -97,4 +97,16 @@ public class DarajaTokenManager {
         String rawHeader = darajaConfig.getConsumerKey() + ":" + darajaConfig.getConsumerSecret();
         return "Basic " + Base64.getEncoder().encodeToString(rawHeader.getBytes(StandardCharsets.UTF_8));
     }
+
+    /**
+     * Evicts the currently cached access token from Redis.
+     */
+    public void evictToken() {
+        try {
+            redisTemplate.delete(REDIS_TOKEN_KEY);
+            log.info("Evicted Daraja access token from Redis");
+        } catch (Exception e) {
+            log.warn("Failed to evict Daraja access token from Redis: {}", e.getMessage());
+        }
+    }
 }

@@ -5,6 +5,7 @@ import com.openfloat.mpesa.entity.AuditLog;
 import com.openfloat.mpesa.repository.AuditLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,19 +21,19 @@ public class AuditService {
 
     private final AuditLogRepository auditLogRepository;
 
-    private static final String GENESIS_HASH = "0000000000000000000000000000000000000000000000000000000000000000";
 
     /**
      * Records a secure, hash-chained audit log entry.
      * Transaction propagation is set to REQUIRES_NEW to log even if the target business method fails.
      */
+    @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public synchronized AuditLog log(String username, AuditEventType action, String resource, String resourceId, String details, String ipAddress) {
+    public synchronized void log(String username, AuditEventType action, String resource, String resourceId, String details, String ipAddress) {
         log.debug("Creating audit log for user: {}, action: {}", username, action);
 
-        // 1. Fetch latest audit log for previous hash
-        Optional<AuditLog> latestLog = auditLogRepository.findLatest();
-        String previousHash = latestLog.map(AuditLog::getHash).orElse(GENESIS_HASH);
+        // 1. Fetch latest audit log for previous hash with lock to serialize concurrent logging
+        Optional<AuditLog> latestLog = auditLogRepository.findLatestForUpdate();
+        String previousHash = latestLog.map(AuditLog::getHash).orElse(HashUtils.GENESIS_HASH);
 
         // 2. Build current entry data string
         Instant timestamp = Instant.now();
@@ -65,8 +66,6 @@ public class AuditService {
         // Log formatted structure for ELK / Splunk collectors
         log.info("AUDIT_LOG_JSON: {\"id\":\"{}\", \"username\":\"{}\", \"action\":\"{}\", \"resource\":\"{}\", \"resourceId\":\"{}\", \"ip\":\"{}\", \"timestamp\":\"{}\", \"hash\":\"{}\"}",
                 auditEntry.getId(), username, action.name(), resource, resourceId, ipAddress, timestamp, chainedHash);
-
-        return auditEntry;
     }
 
     /**
@@ -81,7 +80,7 @@ public class AuditService {
             return true;
         }
 
-        String expectedPreviousHash = GENESIS_HASH;
+        String expectedPreviousHash = HashUtils.GENESIS_HASH;
         for (AuditLog entry : allLogs) {
             String entryData = String.format("%s|%s|%s|%s|%s|%s|%d",
                     entry.getUsername(),

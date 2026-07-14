@@ -36,6 +36,16 @@ public class RateLimitFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        String path = request.getRequestURI();
+        // Exclude M-Pesa callbacks, health checks, and API docs from rate limiting
+        if (path.startsWith("/api/v1/mpesa/callbacks") || 
+            path.startsWith("/actuator") || 
+            path.startsWith("/swagger") || 
+            path.contains("openapi")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String clientId = resolveClientId(request);
         String redisKey = REDIS_RATE_LIMIT_PREFIX + clientId + ":" + (Instant.now().getEpochSecond() / rateLimitConfig.getWindowSeconds());
 
