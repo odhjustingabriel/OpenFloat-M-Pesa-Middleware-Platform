@@ -50,4 +50,9 @@ public class DarajaConfig {
     public String getC2bRegisterUrl() {
         return baseUrl + "/mpesa/c2b/v1/registerurl";
     }
+
+    /** STK Push Query — checks the final result of an initiated STK Push. */
+    public String getStkQueryUrl() {
+        return baseUrl + "/mpesa/stkpush/v1/query";
+    }
 }

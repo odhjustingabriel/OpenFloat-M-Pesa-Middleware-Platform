@@ -36,6 +36,11 @@ public class DarajaClient {
         return postToDaraja(darajaConfig.getC2bRegisterUrl(), request, C2BRegisterResponse.class);
     }
 
+    public StkQueryResponse queryStkPush(StkQueryRequest request) {
+        log.info("Sending STK Push Query request for CheckoutRequestID: {}", request.getCheckoutRequestId());
+        return postToDaraja(darajaConfig.getStkQueryUrl(), request, StkQueryResponse.class);
+    }
+
     private <T, R> R postToDaraja(String url, T body, Class<R> responseType) {
         String token = tokenManager.getAccessToken();
 

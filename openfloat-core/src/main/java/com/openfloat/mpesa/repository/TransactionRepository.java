@@ -61,4 +61,25 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
     Page<Transaction> findByPaybill(String paybill, Pageable pageable);
 
     long countByStatus(TransactionStatus status);
+
+    /**
+     * Finds STK Push transactions that are still awaiting reconciliation and were
+     * created before the given cutoff time. Used by the nightly reconciliation scheduler
+     * to cross-reference final status with the Safaricom STK Query API.
+     *
+     * @param reconciliationStatus the reconciliation status to filter on (typically PENDING)
+     * @param cutoff               only include transactions created before this instant
+     * @return list of transactions requiring reconciliation
+     */
+    @Query("""
+            SELECT t FROM Transaction t
+            WHERE t.reconciliationStatus = :reconciliationStatus
+              AND t.createdAt < :cutoff
+              AND t.checkoutRequestId IS NOT NULL
+            ORDER BY t.createdAt ASC
+            """)
+    java.util.List<Transaction> findPendingReconciliationTransactions(
+            @Param("reconciliationStatus") ReconciliationStatus reconciliationStatus,
+            @Param("cutoff") Instant cutoff
+    );
 }

@@ -66,9 +66,10 @@ openfloat:
       client-secret: sap-secret
     oracle:
       base-url: https://oracle.example.com/api
+      username: oracle-integration-user
       api-key: oracle-api-key
     dynamics:
-      base-url: https://dynamics.example.com/api
+      base-url: https://api.businesscentral.dynamics.com/v2.0/your-env/api/v2.0
       tenant-id: dynamics-tenant
       client-id: dynamics-client
       client-secret: dynamics-secret
