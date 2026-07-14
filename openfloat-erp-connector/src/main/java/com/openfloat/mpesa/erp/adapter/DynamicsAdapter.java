@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @Slf4j
 @Component
+@SuppressWarnings("null")
 public class DynamicsAdapter implements ERPAdapter {
 
     private static final String MICROSOFT_TOKEN_URL =
@@ -76,8 +77,7 @@ public class DynamicsAdapter implements ERPAdapter {
             tokenExpiresAt = Instant.EPOCH; // force refresh
             token = getAccessToken();
             headers.setBearerAuth(token);
-            request = new HttpEntity<>(payload, headers);
-            String response = restTemplate.postForObject(baseUrl + "/general-journals", request, String.class);
+            restTemplate.postForObject(baseUrl + "/general-journals", request, String.class);
             log.info("Dynamics 365 Adapter: Retry sync successful for txnId={}", event.getTransactionId());
         } catch (Exception e) {
             log.error("Dynamics 365 Adapter: Sync FAILED for txnId={}. Error: {}",

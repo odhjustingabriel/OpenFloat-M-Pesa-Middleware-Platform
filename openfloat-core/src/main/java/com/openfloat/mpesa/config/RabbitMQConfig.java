@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
  * </p>
  */
 @Configuration
+@SuppressWarnings("null")
 public class RabbitMQConfig {
 
     // ── Exchange Names ────────────────────────────────────────────────────

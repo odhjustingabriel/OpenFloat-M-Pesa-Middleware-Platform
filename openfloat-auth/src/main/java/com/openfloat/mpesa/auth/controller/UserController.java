@@ -23,6 +23,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
+@SuppressWarnings("null")
 public class UserController {
 
     private final UserRepository userRepository;

@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class DarajaTokenManager {
 
     private static final String REDIS_TOKEN_KEY = "daraja:access_token";
@@ -68,10 +69,11 @@ public class DarajaTokenManager {
                     DarajaTokenResponse.class
             );
 
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                String token = response.getBody().getAccessToken();
+            DarajaTokenResponse body = response.getBody();
+            if (response.getStatusCode().is2xxSuccessful() && body != null) {
+                String token = body.getAccessToken();
                 // Expiry from Daraja is usually in seconds (e.g. "3599")
-                long expiresInSeconds = Long.parseLong(response.getBody().getExpiresIn());
+                long expiresInSeconds = Long.parseLong(body.getExpiresIn());
                 
                 // Buffer by 5 minutes to prevent edge-case token expiration failures
                 long cacheExpiry = Math.max(60, expiresInSeconds - 300);

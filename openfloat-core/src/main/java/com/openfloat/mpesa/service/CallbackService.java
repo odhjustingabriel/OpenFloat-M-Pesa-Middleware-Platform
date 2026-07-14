@@ -23,6 +23,7 @@ import java.util.*;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings({"unchecked", "null", "unused"})
 public class CallbackService {
 
     private final TransactionRepository transactionRepository;

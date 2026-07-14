@@ -1,10 +1,6 @@
 package com.openfloat.mpesa.service;
 
 import com.openfloat.mpesa.common.util.PhoneNumberUtils;
-import com.openfloat.mpesa.entity.Transaction;
-import com.openfloat.mpesa.entity.enums.ReconciliationStatus;
-import com.openfloat.mpesa.entity.enums.TransactionStatus;
-import com.openfloat.mpesa.entity.enums.TransactionType;
 import com.openfloat.mpesa.integration.mpesa.DarajaClient;
 import com.openfloat.mpesa.integration.mpesa.DarajaConfig;
 import com.openfloat.mpesa.integration.mpesa.DarajaTokenManager;
@@ -32,7 +28,6 @@ public class C2BService {
     private final DarajaClient darajaClient;
     private final DarajaConfig darajaConfig;
     private final DarajaTokenManager tokenManager;
-    private final TransactionService transactionService;
     private final RestTemplate restTemplate = new RestTemplate();
 
     /**
@@ -56,6 +51,7 @@ public class C2BService {
      * Simulates a C2B payment transaction (Only valid in Safaricom Sandbox environment).
      */
     @Transactional
+    @SuppressWarnings({ "null", "unchecked", "rawtypes" })
     public Map<String, Object> simulateTransaction(String msisdn, BigDecimal amount, String billRefNumber) {
         String normalizedPhone = PhoneNumberUtils.normalize(msisdn);
         String url = darajaConfig.getBaseUrl() + "/mpesa/c2b/v1/simulate";
@@ -78,7 +74,8 @@ public class C2BService {
         try {
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
             ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
-            return response.getBody();
+            Map<String, Object> responseBody = response.getBody();
+            return responseBody;
         } catch (Exception e) {
             log.error("Failed to simulate C2B transaction: {}", e.getMessage(), e);
             throw new IllegalStateException("C2B Simulation failed: " + e.getMessage(), e);

@@ -10,6 +10,7 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class DarajaClient {
 
     private final DarajaConfig darajaConfig;

@@ -13,8 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
@@ -81,7 +79,7 @@ public class AuthorizationServerConfig {
                 // Add roles to the claims if it's a user login
                 if (context.getPrincipal().getPrincipal() instanceof org.springframework.security.core.userdetails.User user) {
                     context.getClaims().claim("roles", user.getAuthorities().stream()
-                            .map(org.springframework.security.core.GrantedAuthority::getAuthority)
+                            .map(auth -> auth.getAuthority())
                             .toList());
                 } else {
                     // Client credentials flow: add client roles for system-to-system calls

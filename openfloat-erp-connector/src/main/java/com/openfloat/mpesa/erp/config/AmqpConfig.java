@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
  * RabbitMQ to route it to the dead-letter exchange.
  */
 @Configuration
+@SuppressWarnings("null")
 public class AmqpConfig {
 
     // ── Exchange names ────────────────────────────────────────────────────

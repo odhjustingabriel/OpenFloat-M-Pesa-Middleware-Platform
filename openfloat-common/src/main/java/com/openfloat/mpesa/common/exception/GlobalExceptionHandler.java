@@ -20,6 +20,7 @@ import java.util.Map;
  */
 @Slf4j
 @RestControllerAdvice
+@SuppressWarnings("null")
 public class GlobalExceptionHandler {
 
     @org.springframework.web.bind.annotation.ExceptionHandler(DuplicateResourceException.class)

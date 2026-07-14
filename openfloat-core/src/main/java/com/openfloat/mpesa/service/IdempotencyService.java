@@ -16,6 +16,7 @@ import java.util.HexFormat;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class IdempotencyService {
 
     private static final String REDIS_IDEMPOTENCY_PREFIX = "idempotency:";

@@ -17,6 +17,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class AuditService {
 
     private final AuditLogRepository auditLogRepository;
@@ -33,7 +34,7 @@ public class AuditService {
 
         // 1. Fetch latest audit log for previous hash with lock to serialize concurrent logging
         Optional<AuditLog> latestLog = auditLogRepository.findLatestForUpdate();
-        String previousHash = latestLog.map(AuditLog::getHash).orElse(HashUtils.GENESIS_HASH);
+        String previousHash = latestLog.map(entry -> entry.getHash()).orElse(HashUtils.GENESIS_HASH);
 
         // 2. Build current entry data string
         Instant timestamp = Instant.now();
