@@ -1,6 +1,6 @@
 # OpenFloat M-Pesa Middleware — Walkthrough & Implementation Checklist
 
-> **Status as of 2026-07-14:** Phases 1, 2, 3, and 4 are fully implemented; Phase 5 observability is implemented and unit-test coverage has started.
+> **Status as of 2026-07-17:** Phases 1, 2, 3, 4, and 5 are fully implemented. Unit and integration test suites are complete.
 
 ---
 
@@ -11,7 +11,7 @@ Phase 1 — Shared Foundation & Infrastructure     █████████�
 Phase 2 — Core M-Pesa Integration Service        ████████████ 100%  ✅
 Phase 3 — Authentication & Security Hardening    ████████████ 100%  ✅
 Phase 4 — ERP Connector & Reconciliation         ████████████ 100%  ✅
-Phase 5 — Testing & Observability                ███████░░░░░  55%  🟨
+Phase 5 — Testing & Observability                ████████████ 100%  ✅
 Phase 6 — API Gateway & Staff Portal             ░░░░░░░░░░░░   0%  ⬜
 Phase 7 — Production Hardening & Go-Live         ░░░░░░░░░░░░   0%  ⬜
 ```
@@ -219,22 +219,22 @@ The `AmqpConfig` declares a complete dead-letter topology:
 
 ---
 
-## Phase 5 — Testing & Observability 🟨
+## Phase 5 — Testing & Observability ✅
 
 ### Checklist
 
 #### Unit Tests
 - [x] `StkPushServiceTest.java` — happy path, Daraja error, duplicate idempotency key
-- [ ] `CallbackServiceTest.java` — STK/B2C/Reversal callbacks; verify RabbitMQ publish
-- [ ] `AuditAspectTest.java` — hash-chain integrity with 3 sequential entries
-- [ ] `JpaRegisteredClientRepositoryTest.java` — JWT contains correct `role` claim
+- [x] `CallbackServiceTest.java` — STK/B2C/Reversal callbacks; verify RabbitMQ publish
+- [x] `AuditServiceTest.java` — hash-chain integrity with 3 sequential entries
+- [x] `JpaRegisteredClientRepositoryTest.java` — JWT contains correct `role` claim
 - [x] `ERPDispatchServiceTest.java` — adapter routing + retry counter increments
-- [ ] `ReconciliationSchedulerTest.java` — MATCHED, MISMATCHED, IN_PROGRESS, Daraja error paths
+- [x] `ReconciliationSchedulerTest.java` — MATCHED, MISMATCHED, IN_PROGRESS, Daraja error paths
 
 #### Integration Tests (Testcontainers)
-- [ ] `PaymentFlowIT.java` — full STK Push → callback → DB state → event published
-- [ ] `RateLimitIT.java` — 110 requests → first 100 OK, next 10 → HTTP 429
-- [ ] `ERPConnectorIT.java` — publish event → sync record created → DLQ after 5 failures
+- [x] `PaymentFlowIT.java` — full STK Push → callback → DB state → event published
+- [x] `RateLimitIT.java` — 110 requests → first 100 OK, next 10 → HTTP 429
+- [x] `ERPConnectorIT.java` — publish event → sync record created → DLQ after 5 failures
 
 #### Observability
 - [x] Add Prometheus/Actuator config to `application.yml` files (erp, auth modules)

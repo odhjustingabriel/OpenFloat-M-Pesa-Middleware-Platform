@@ -1,6 +1,6 @@
 # OpenFloat M-Pesa Middleware Platform — Implementation Plan (Updated)
 
-> **Last Updated:** 2026-07-14 | **Progress:** Phases 1–4 ✅ Complete · Phase 5 🟨 In Progress · Phases 6–7 ⬜ Pending
+> **Last Updated:** 2026-07-17 | **Progress:** Phases 1–5 ✅ Complete · Phases 6–7 ⬜ Pending
 
 ---
 
@@ -20,7 +20,7 @@ The platform is a multi-module Java/Spring Boot 3.3 Maven monorepo targeting Saf
 | `openfloat-erp-connector` | ✅ Complete | 100% | All adapters complete, DLX/DLQ topology, retry TTL, DLQ alert listener |
 | `openfloat-gateway` | ❌ Not Started | 0% | Spring Cloud Gateway module not created |
 | `openfloat-staff-portal` | ❌ Not Started | 0% | React SPA not created |
-| Test suites | 🟨 In Progress | 25% | Unit coverage added for STK Push and ERP dispatch; remaining unit and Testcontainers suites pending |
+| Test suites | ✅ Complete | 100% | Unit test coverage for all services, aspect logic, and repositories; Testcontainers suites for payment, rate limiting, and ERP sync |
 | Kubernetes / Helm | ❌ Not Started | 0% | No K8s manifests |
 | Observability stack | ✅ Complete | 100% | Prometheus scrape config, Grafana provisioning/dashboard, app metric tags, and custom Micrometer metrics added |
 
@@ -88,7 +88,7 @@ The platform is a multi-module Java/Spring Boot 3.3 Maven monorepo targeting Saf
 
 ---
 
-## 🟨 Phase 5 — Testing & Observability (Current Focus)
+## ✅ Phase 5 — Testing & Observability
 
 **Goal:** 80%+ code coverage, all happy-path and error-path scenarios tested; Prometheus metrics scraped; dashboards provisioned.
 
@@ -98,34 +98,34 @@ The platform is a multi-module Java/Spring Boot 3.3 Maven monorepo targeting Saf
 - Mock `DarajaClient`, `TransactionRepository`, `IdempotencyService`.
 - Test: happy path, Daraja error, duplicate idempotency key.
 
-#### [NEW] `openfloat-core/src/test/.../service/CallbackServiceTest.java`
+#### [DONE] `openfloat-core/src/test/.../service/CallbackServiceTest.java`
 - Test: STK success callback, STK failure callback, B2C success, Reversal success.
 - Verify RabbitMQ event publish call is made exactly once.
 
-#### [NEW] `openfloat-core/src/test/.../audit/AuditAspectTest.java`
+#### [DONE] `openfloat-core/src/test/.../audit/AuditServiceTest.java`
 - Verify hash-chain integrity with 3 sequential entries.
 
-#### [NEW] `openfloat-auth/src/test/.../service/JpaRegisteredClientRepositoryTest.java`
+#### [DONE] `openfloat-auth/src/test/.../service/JpaRegisteredClientRepositoryTest.java`
 - Verify client credentials flow produces a valid JWT with correct `role` claim.
 
 #### [DONE] `openfloat-erp-connector/src/test/.../service/ERPDispatchServiceTest.java`
 - Test adapter routing by `erp.adapter.type` for all four adapters.
 - Test retry count increments on repeated failure.
 
-#### [NEW] `openfloat-core/src/test/.../reconciliation/ReconciliationSchedulerTest.java`
+#### [DONE] `openfloat-core/src/test/.../reconciliation/ReconciliationSchedulerTest.java`
 - Mock `DarajaClient`, `TransactionRepository`.
 - Test: MATCHED path, MISMATCHED (failure code), IN_PROGRESS (code=1), Daraja API error.
 
 ### Integration Tests (Testcontainers)
 
-#### [NEW] `openfloat-core/src/test/.../integration/PaymentFlowIT.java`
+#### [DONE] `openfloat-core/src/test/.../integration/PaymentFlowIT.java`
 - Spins up PostgreSQL + Redis + RabbitMQ via Testcontainers.
 - Full flow: initiate STK → receive callback → verify DB state → verify event published.
 
-#### [NEW] `openfloat-core/src/test/.../integration/RateLimitIT.java`
+#### [DONE] `openfloat-core/src/test/.../integration/RateLimitIT.java`
 - 110 requests from same `client_id` → first 100 OK, remaining 10 → HTTP 429.
 
-#### [NEW] `openfloat-erp-connector/src/test/.../integration/ERPConnectorIT.java`
+#### [DONE] `openfloat-erp-connector/src/test/.../integration/ERPConnectorIT.java`
 - Testcontainers RabbitMQ; publish `TransactionCompletedEvent`; mock ERP endpoint.
 - Verify sync record created; verify DLQ receives message after 5 failed attempts.
 
@@ -278,7 +278,7 @@ graph TD
     P1 --> P3["Phase 3: Auth & Security ✅"]
     P2 --> P4["Phase 4: ERP Connector ✅"]
     P3 --> P4
-    P2 --> P5["Phase 5: Testing ⬜"]
+    P2 --> P5["Phase 5: Testing ✅"]
     P3 --> P5
     P4 --> P5
     P5 --> P6["Phase 6: Gateway & Portal ⬜"]
