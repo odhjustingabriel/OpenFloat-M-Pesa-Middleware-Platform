@@ -23,7 +23,6 @@ import java.time.Instant;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -202,7 +201,6 @@ class CallbackServiceTest {
                 .build();
     }
 
-    @SuppressWarnings("unchecked")
     private Map<String, Object> stkSuccessPayload() {
         Map<String, Object> item1 = Map.of("Name", "MpesaReceiptNumber", "Value", "RCPT123456");
         Map<String, Object> item2 = Map.of("Name", "Amount", "Value", 10);

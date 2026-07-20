@@ -11,6 +11,7 @@ import org.testcontainers.utility.DockerImageName;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@SuppressWarnings("resource") // Testcontainers are closed via JVM shutdown hooks, not try-with-resources
 public abstract class BaseIntegrationTest {
 
     static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
