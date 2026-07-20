@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "openfloat.rate-limit.requests-per-minute=5",
         "openfloat.rate-limit.window-seconds=60"
 }, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SuppressWarnings("null")
 public class RateLimitIT extends BaseIntegrationTest {
 
     @Autowired
