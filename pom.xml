@@ -24,6 +24,7 @@
         <module>openfloat-core</module>
         <module>openfloat-auth</module>
         <module>openfloat-erp-connector</module>
+        <module>openfloat-gateway</module>
     </modules>
 
     <properties>

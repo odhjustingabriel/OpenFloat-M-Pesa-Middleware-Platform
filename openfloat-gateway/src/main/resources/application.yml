@@ -1,0 +1,68 @@
+server:
+  port: 8443
+
+spring:
+  application:
+    name: openfloat-gateway
+
+  cloud:
+    gateway:
+      routes:
+        - id: core-service
+          uri: ${OPENFLOAT_CORE_URI:http://localhost:8080}
+          predicates:
+            - Path=/api/v1/payments/**, /api/v1/transactions/**, /api/v1/mpesa/**
+          filters:
+            - TokenRelay
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 150
+                key-resolver: "#{@userKeyResolver}"
+
+        - id: auth-service
+          uri: ${OPENFLOAT_AUTH_URI:http://localhost:8081}
+          predicates:
+            - Path=/oauth2/**, /api/v1/users/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 150
+                key-resolver: "#{@userKeyResolver}"
+
+  # Reactive Redis configuration for rate limiting
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI:http://localhost:8081/oauth2/jwks}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: openfloat-gateway
+
+# Configurable Safaricom IP ranges for Whitelisting on M-Pesa Callback routes
+openfloat:
+  gateway:
+    safaricom-ip-ranges:
+      - 196.201.214.0/24
+      - 196.201.213.0/24
+      - 196.201.212.0/24
+      - 127.0.0.1/32

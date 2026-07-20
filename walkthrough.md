@@ -1,6 +1,6 @@
 # OpenFloat M-Pesa Middleware — Walkthrough & Implementation Checklist
 
-> **Status as of 2026-07-17:** Phases 1, 2, 3, 4, and 5 are fully implemented. Unit and integration test suites are complete.
+> **Status as of 2026-07-20:** Phases 1–5 are fully complete. Phase 6 (API Gateway & Staff Portal) is currently in progress (25% complete).
 
 ---
 
@@ -12,7 +12,7 @@ Phase 2 — Core M-Pesa Integration Service        █████████�
 Phase 3 — Authentication & Security Hardening    ████████████ 100%  ✅
 Phase 4 — ERP Connector & Reconciliation         ████████████ 100%  ✅
 Phase 5 — Testing & Observability                ████████████ 100%  ✅
-Phase 6 — API Gateway & Staff Portal             ░░░░░░░░░░░░   0%  ⬜
+Phase 6 — API Gateway & Staff Portal             ███░░░░░░░░░  25%  🟨
 Phase 7 — Production Hardening & Go-Live         ░░░░░░░░░░░░   0%  ⬜
 ```
 
@@ -249,15 +249,15 @@ The `AmqpConfig` declares a complete dead-letter topology:
 
 ---
 
-## Phase 6 — API Gateway & Staff Portal ⬜
+## Phase 6 — API Gateway & Staff Portal 🟨
 
 ### Checklist
 
 #### `openfloat-gateway` Module
-- [ ] Create `openfloat-gateway/pom.xml` + add to parent pom
-- [ ] Create `application.yml` with route definitions (core, auth)
-- [ ] Create `IpWhitelistFilter.java` — block non-Safaricom IPs on callback routes
-- [ ] Create `RequestLoggingFilter.java` — structured request/response logging
+- [x] Create `openfloat-gateway/pom.xml` + add to parent pom
+- [x] Create `application.yml` with route definitions (core, auth)
+- [x] Create `IpWhitelistFilter.java` — block non-Safaricom IPs on callback routes
+- [x] Create `RequestLoggingFilter.java` — structured request/response logging
 
 #### `openfloat-staff-portal` React SPA
 - [ ] Scaffold project with Vite + TypeScript + TanStack Query + Tailwind

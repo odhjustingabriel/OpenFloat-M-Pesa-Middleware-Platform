@@ -1,6 +1,6 @@
 # OpenFloat M-Pesa Middleware Platform — Implementation Plan (Updated)
 
-> **Last Updated:** 2026-07-17 | **Progress:** Phases 1–5 ✅ Complete · Phases 6–7 ⬜ Pending
+> **Last Updated:** 2026-07-20 | **Progress:** Phases 1–5 ✅ Complete · Phase 6 🟨 In Progress (25%) · Phase 7 ⬜ Pending
 
 ---
 
@@ -166,39 +166,22 @@ mvn jacoco:report                # Coverage report generation (requires dependen
 
 ---
 
-## ⬜ Phase 6 — API Gateway & Staff Portal (Week 8–10)
+## 🟨 Phase 6 — API Gateway & Staff Portal (Week 8–10 — In Progress)
 
 **Goal:** All traffic passes through a single hardened gateway; staff have a polished React SPA to initiate payments and view transaction history.
 
 ### `openfloat-gateway` — New Module
 
-#### [NEW] `openfloat-gateway/pom.xml`
+#### [DONE] `openfloat-gateway/pom.xml`
 - Dependencies: `spring-cloud-starter-gateway`, `spring-boot-starter-oauth2-resource-server`, `micrometer-registry-prometheus`.
 
-#### [NEW] `openfloat-gateway/src/main/resources/application.yml`
-```yaml
-spring:
-  cloud:
-    gateway:
-      routes:
-        - id: core-service
-          uri: http://openfloat-core:8080
-          predicates: [Path=/api/v1/payments/**, /api/v1/transactions/**, /api/v1/mpesa/**]
-        - id: auth-service
-          uri: http://openfloat-auth:8081
-          predicates: [Path=/oauth2/**, /api/v1/users/**]
-      default-filters:
-        - TokenRelay
-        - name: RequestRateLimiter
-          args:
-            redis-rate-limiter.replenishRate: 100
-            redis-rate-limiter.burstCapacity: 150
-```
+#### [DONE] `openfloat-gateway/src/main/resources/application.yml`
+- Routes defined for `/api/v1/payments/**`, `/api/v1/transactions/**`, `/api/v1/mpesa/**` (core), and `/oauth2/**`, `/api/v1/users/**` (auth). TokenRelay and Redis rate limiting setup.
 
-#### [NEW] `openfloat-gateway/.../filter/IpWhitelistFilter.java`
+#### [DONE] `openfloat-gateway/.../filter/IpWhitelistFilter.java`
 - Read Safaricom IP ranges from config; block callback routes from non-whitelisted IPs with `403`.
 
-#### [NEW] `openfloat-gateway/.../filter/RequestLoggingFilter.java`
+#### [DONE] `openfloat-gateway/.../filter/RequestLoggingFilter.java`
 - Log every inbound request: `client_id`, method, path, duration, response status.
 
 ### `openfloat-staff-portal` — React SPA
