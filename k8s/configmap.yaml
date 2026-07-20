@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openfloat-config
+  namespace: openfloat
+data:
+  SPRING_REDIS_HOST: redis
+  SPRING_REDIS_PORT: "6379"
+  OPENFLOAT_CORE_URI: http://openfloat-core:8080
+  OPENFLOAT_AUTH_URI: http://openfloat-auth:8081
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://openfloat-auth:8081/oauth2/jwks

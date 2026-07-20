@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openfloat-core
+  namespace: openfloat
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: openfloat-core
+  template:
+    metadata:
+      labels:
+        app: openfloat-core
+    spec:
+      containers:
+        - name: openfloat-core
+          image: openfloat/openfloat-core:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: openfloat-config
+            - secretRef:
+                name: openfloat-secrets
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits: { cpu: "1", memory: 1Gi }
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: 8080 }
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: 8080 }
+            initialDelaySeconds: 60
+            periodSeconds: 20

@@ -1,6 +1,6 @@
 # OpenFloat M-Pesa Middleware Platform — Implementation Plan (Updated)
 
-> **Last Updated:** 2026-07-20 | **Progress:** Phases 1–5 ✅ Complete · Phase 6 🟨 In Progress (25%) · Phase 7 ⬜ Pending
+> **Last Updated:** 2026-07-20 | **Progress:** Phases 1–5 ✅ Complete · Phase 6 ✅ Complete · Phase 7 ⬜ Pending
 
 ---
 
@@ -18,10 +18,10 @@ The platform is a multi-module Java/Spring Boot 3.3 Maven monorepo targeting Saf
 | `openfloat-core` | ✅ Complete | 100% | All payment flows, callbacks, audit chain, security, rate limiting, reconciliation scheduler |
 | `openfloat-auth` | ✅ Complete | 100% | OAuth2 AS, role-claim JWT, LDAP config, user status endpoints, resource server |
 | `openfloat-erp-connector` | ✅ Complete | 100% | All adapters complete, DLX/DLQ topology, retry TTL, DLQ alert listener |
-| `openfloat-gateway` | ❌ Not Started | 0% | Spring Cloud Gateway module not created |
-| `openfloat-staff-portal` | ❌ Not Started | 0% | React SPA not created |
+| `openfloat-gateway` | ✅ Complete | 100% | Spring Cloud Gateway routes, OAuth2 resource server, Redis rate limiting, IP whitelist, request logging |
+| `openfloat-staff-portal` | ✅ Complete | 100% | React/Vite/TypeScript staff portal with operational pages, dark Safaricom-themed UI, CSV export |
 | Test suites | ✅ Complete | 100% | Unit test coverage for all services, aspect logic, and repositories; Testcontainers suites for payment, rate limiting, and ERP sync |
-| Kubernetes / Helm | ❌ Not Started | 0% | No K8s manifests |
+| Kubernetes / Helm | ✅ Complete | 100% | Kubernetes manifests for namespace, config, secrets, deployments, services, ingress, and core HPA |
 | Observability stack | ✅ Complete | 100% | Prometheus scrape config, Grafana provisioning/dashboard, app metric tags, and custom Micrometer metrics added |
 
 ---
@@ -166,7 +166,7 @@ mvn jacoco:report                # Coverage report generation (requires dependen
 
 ---
 
-## 🟨 Phase 6 — API Gateway & Staff Portal (Week 8–10 — In Progress)
+## ✅ Phase 6 — API Gateway & Staff Portal (Week 8–10 — Complete)
 
 **Goal:** All traffic passes through a single hardened gateway; staff have a polished React SPA to initiate payments and view transaction history.
 
@@ -186,7 +186,7 @@ mvn jacoco:report                # Coverage report generation (requires dependen
 
 ### `openfloat-staff-portal` — React SPA
 
-#### [NEW] `openfloat-staff-portal/` (React + Vite + TypeScript)
+#### [DONE] `openfloat-staff-portal/` (React + Vite + TypeScript)
 
 **Pages & Components:**
 
@@ -208,10 +208,10 @@ mvn jacoco:report                # Coverage report generation (requires dependen
 
 ### Infrastructure
 
-#### [MODIFY] `docker-compose.yml`
-- Add: `openfloat-gateway` (8443), `openfloat-staff-portal` (3000), `prometheus` (9090), `grafana` (3001).
+#### [DONE] `docker-compose.yml`
+- Added: `openfloat-gateway` (8443), `openfloat-staff-portal` (3000), `prometheus` (9090), `grafana` (3001).
 
-#### [NEW] `k8s/` directory
+#### [DONE] `k8s/` directory
 - `namespace.yaml`, `configmap.yaml`, `secret.yaml`
 - `deployment-*.yaml` (core, auth, erp, gateway)
 - `service-*.yaml`, `ingress.yaml` (TLS via cert-manager)
