@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: openfloat-ingress
+  namespace: openfloat
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+    - hosts: [api.openfloat.example.com, staff.openfloat.example.com]
+      secretName: openfloat-gateway-tls
+  rules:
+    - host: api.openfloat.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: openfloat-gateway
+                port:
+                  number: 8443
+
+    - host: staff.openfloat.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: openfloat-staff-portal
+                port:
+                  number: 80

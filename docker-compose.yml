@@ -64,6 +64,38 @@ services:
     networks:
       - openfloat-network
 
+  openfloat-gateway:
+    build:
+      context: ./openfloat-gateway
+    container_name: openfloat-gateway
+    environment:
+      OPENFLOAT_CORE_URI: http://host.docker.internal:8080
+      OPENFLOAT_AUTH_URI: http://host.docker.internal:8081
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:8081/oauth2/jwks
+    ports:
+      - "8443:8443"
+    depends_on:
+      - redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - openfloat-network
+
+  openfloat-staff-portal:
+    build:
+      context: ./openfloat-staff-portal
+    container_name: openfloat-staff-portal
+    environment:
+      VITE_API_BASE_URL: http://localhost:8443
+      VITE_AUTH_BASE_URL: http://localhost:8443
+    ports:
+      - "3000:80"
+    depends_on:
+      - openfloat-gateway
+    networks:
+      - openfloat-network
 
   prometheus:
     image: prom/prometheus:v2.53.1

@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openfloat-gateway
+  namespace: openfloat
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: openfloat-gateway
+  template:
+    metadata:
+      labels:
+        app: openfloat-gateway
+    spec:
+      containers:
+        - name: openfloat-gateway
+          image: openfloat/openfloat-gateway:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8443
+          envFrom:
+            - configMapRef:
+                name: openfloat-config
+            - secretRef:
+                name: openfloat-secrets
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits: { cpu: "1", memory: 1Gi }
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: 8443 }
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: 8443 }
+            initialDelaySeconds: 60
+            periodSeconds: 20
