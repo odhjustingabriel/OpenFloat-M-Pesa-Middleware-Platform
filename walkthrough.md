@@ -1,6 +1,6 @@
 # OpenFloat M-Pesa Middleware — Walkthrough & Implementation Checklist
 
-> **Status as of 2026-07-20:** Phases 1–5 are fully complete. Phase 6 (API Gateway & Staff Portal) is currently in progress (25% complete).
+> **Status as of 2026-07-21:** Phases 1–5 are fully complete. Phase 6 (API Gateway & Staff Portal) is currently in progress (50% complete).
 
 ---
 
@@ -12,7 +12,7 @@ Phase 2 — Core M-Pesa Integration Service        █████████�
 Phase 3 — Authentication & Security Hardening    ████████████ 100%  ✅
 Phase 4 — ERP Connector & Reconciliation         ████████████ 100%  ✅
 Phase 5 — Testing & Observability                ████████████ 100%  ✅
-Phase 6 — API Gateway & Staff Portal             ███░░░░░░░░░  25%  🟨
+Phase 6 — API Gateway & Staff Portal             ██████░░░░░░  50%  🟨
 Phase 7 — Production Hardening & Go-Live         ░░░░░░░░░░░░   0%  ⬜
 ```
 
@@ -276,10 +276,21 @@ The `AmqpConfig` declares a complete dead-letter topology:
   - File: [RequestLoggingFilter.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-gateway/src/main/java/com/openfloat/mpesa/gateway/filter/RequestLoggingFilter.java)
 
 #### `openfloat-staff-portal` React SPA
-- [ ] Scaffold project with Vite + TypeScript + TanStack Query + Tailwind
-- [ ] `LoginPage` — OAuth2 PKCE flow
-- [ ] `DashboardPage` — summary cards + charts
-- [ ] `PaymentInitiatePage` — STK Push form with live status polling
+- [x] **Project Scaffold & Design System** — Vite + TypeScript + TanStack Query + Tailwind CSS tokens
+  - Files: [package.json](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/package.json) · [styles.css](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/styles.css) · [index.html](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/index.html) · [main.tsx](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/main.tsx)
+
+- [x] **OAuth2 PKCE & API Client** — PKCE code challenge generation, Bearer token interceptor, auto 401 redirect
+  - Files: [client.ts](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/api/client.ts) · [queries.ts](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/api/queries.ts) · [domain.ts](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/types/domain.ts)
+
+- [x] **`LoginPage`** — OAuth2 PKCE sign-in flow + developer demo session shortcut
+  - File: [LoginPage.tsx](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/pages/LoginPage.tsx)
+
+- [x] **`DashboardPage`** — Summary metric cards, Recharts volume line chart & status bar chart, live recent transactions table
+  - File: [DashboardPage.tsx](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/pages/DashboardPage.tsx)
+
+- [x] **`PaymentInitiatePage`** — STK Push form with Zod schema validation, mutation trigger, and 3s live status polling
+  - File: [PaymentInitiatePage.tsx](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/pages/PaymentInitiatePage.tsx)
+
 - [ ] `TransactionsPage` — paginated/filterable table + CSV export
 - [ ] `TransactionDetailPage` — full callback + reconciliation + ERP sync view
 - [ ] `AuditLogPage` — admin-only searchable audit log
@@ -287,8 +298,11 @@ The `AmqpConfig` declares a complete dead-letter topology:
 - [ ] `SettingsPage` — paybill config + API client management
 
 #### Infrastructure
-- [ ] Update `docker-compose.yml` — add gateway (8443), portal (3000), prometheus (9090), grafana (3001)
-- [ ] Create `k8s/` directory with all manifests (deployments, services, ingress, HPA)
+- [x] **`docker-compose.yml`** — Services added for gateway (8443), portal (3000), prometheus (9090), and grafana (3001)
+  - File: [docker-compose.yml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/docker-compose.yml)
+
+- [x] **Kubernetes Manifests (`k8s/`)** — Deployments, Services, ConfigMaps, Secrets, Ingress, and HPA
+  - Directory: [k8s/](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/k8s)
 
 ---
 
