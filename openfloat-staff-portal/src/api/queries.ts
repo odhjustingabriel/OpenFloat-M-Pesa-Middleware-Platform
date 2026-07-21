@@ -1,7 +1,104 @@
 import { api } from './client';
-import type { Transaction, User } from '../types/domain';
-export async function fetchTransactions(params:Record<string,string|number|undefined>={}){const {data}=await api.get('/api/v1/transactions',{params}); return data.data?.content ?? data.data?.items ?? [] as Transaction[];}
-export async function fetchTransaction(id:string){const {data}=await api.get(`/api/v1/transactions/${id}`); return data.data as Transaction;}
-export async function initiateStkPush(payload:{msisdn:string; amount:number; accountReference:string; paybill:string}){const {data}=await api.post('/api/v1/payments/stk-push',payload); return data.data;}
-export async function fetchUsers(){const {data}=await api.get('/api/v1/users'); return data.data as User[];}
-export async function createUser(payload:{username:string;email:string;password:string;role:string}){const {data}=await api.post('/api/v1/users',payload); return data.data as User;}
+import type { Transaction, User, AuditLogEntry } from '../types/domain';
+
+/* ── Transactions ─────────────────────────────────── */
+
+export async function fetchTransactions(
+  params: Record<string, string | number | undefined> = {}
+): Promise<Transaction[]> {
+  const { data } = await api.get('/api/v1/transactions', { params });
+  return data.data?.content ?? data.data?.items ?? ([] as Transaction[]);
+}
+
+export async function fetchTransaction(id: string): Promise<Transaction> {
+  const { data } = await api.get(`/api/v1/transactions/${id}`);
+  return data.data as Transaction;
+}
+
+/* ── Payments ─────────────────────────────────────── */
+
+export interface StkPushPayload {
+  msisdn: string;
+  amount: number;
+  accountReference: string;
+  paybill: string;
+}
+
+export interface StkPushResult {
+  transactionId: string;
+  checkoutRequestId: string;
+  merchantRequestId: string;
+  status: string;
+}
+
+export async function initiateStkPush(payload: StkPushPayload): Promise<StkPushResult> {
+  const { data } = await api.post('/api/v1/payments/stk-push', payload);
+  return data.data as StkPushResult;
+}
+
+export async function pollTransactionStatus(transactionId: string): Promise<Transaction> {
+  const { data } = await api.get(`/api/v1/transactions/${transactionId}`);
+  return data.data as Transaction;
+}
+
+/* ── Users ────────────────────────────────────────── */
+
+export async function fetchUsers(): Promise<User[]> {
+  const { data } = await api.get('/api/v1/users');
+  return data.data as User[];
+}
+
+export async function createUser(payload: {
+  username: string;
+  email: string;
+  password: string;
+  role: string;
+}): Promise<User> {
+  const { data } = await api.post('/api/v1/users', payload);
+  return data.data as User;
+}
+
+/* ── Audit ────────────────────────────────────────── */
+
+export async function fetchAuditLogs(
+  params: Record<string, string | number | undefined> = {}
+): Promise<AuditLogEntry[]> {
+  const { data } = await api.get('/api/v1/audit-logs', { params });
+  return data.data?.content ?? data.data?.items ?? ([] as AuditLogEntry[]);
+}
+
+/* ── Dashboard Summary ────────────────────────────── */
+
+export interface DashboardSummary {
+  todayCount: number;
+  todayVolume: number;
+  pendingCount: number;
+  failedCount: number;
+  successRate: number;
+}
+
+export async function fetchDashboardSummary(): Promise<DashboardSummary> {
+  // Try a dedicated summary endpoint first, fall back to computing from transactions
+  try {
+    const { data } = await api.get('/api/v1/dashboard/summary');
+    return data.data as DashboardSummary;
+  } catch {
+    // Compute from recent transactions
+    const txns = await fetchTransactions({ size: 200 });
+    const today = new Date().toISOString().slice(0, 10);
+    const todays = txns.filter((t) => t.createdAt?.startsWith(today));
+    const volume = todays.reduce((sum, t) => sum + Number(t.amount || 0), 0);
+    const pending = txns.filter((t) => t.status === 'PENDING').length;
+    const failed = txns.filter((t) => t.status === 'FAILED').length;
+    const completed = txns.filter((t) => t.status === 'SUCCESS').length;
+    const successRate = txns.length > 0 ? (completed / txns.length) * 100 : 0;
+
+    return {
+      todayCount: todays.length,
+      todayVolume: volume,
+      pendingCount: pending,
+      failedCount: failed,
+      successRate: Math.round(successRate * 10) / 10,
+    };
+  }
+}

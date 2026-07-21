@@ -1,25 +1,175 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { QueryClient, QueryClientProvider, useMutation, useQuery } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { LineChart, Line, ResponsiveContainer, Tooltip } from 'recharts';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { auth } from './api/client';
-import { createUser, fetchTransaction, fetchTransactions, fetchUsers, initiateStkPush } from './api/queries';
+
+import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/DashboardPage';
+import PaymentInitiatePage from './pages/PaymentInitiatePage';
+
 import './styles.css';
 
-const qc=new QueryClient();
-function Shell(){const [page,setPage]=React.useState(location.pathname.slice(1)||'dashboard'); const role=localStorage.getItem('openfloat.role')??'ADMIN'; if(page==='login') return <Login/>; const nav=['dashboard','payments','transactions','audit','users','settings']; return <div className="app"><aside><h1>OpenFloat</h1><span>M-Pesa Operations</span>{nav.filter(n=>role==='ADMIN'||!['audit','users','settings'].includes(n)).map(n=><button className={page===n?'active':''} onClick={()=>setPage(n)} key={n}>{n}</button>)}<button onClick={auth.logout}>Sign out</button></aside><main><Header page={page}/>{page==='dashboard'&&<Dashboard/>}{page==='payments'&&<Payments/>}{page==='transactions'&&<Transactions/>}{page==='audit'&&<Audit/>}{page==='users'&&<Users/>}{page==='settings'&&<Settings/>}</main></div>}
-function Header({page}:{page:string}){return <header><p>Secure gateway console</p><h2>{page[0].toUpperCase()+page.slice(1)}</h2></header>}
-function Login(){return <section className="login card"><h1>OpenFloat Staff Portal</h1><p>Enterprise M-Pesa middleware operations with OAuth2 PKCE-ready sign in.</p><button onClick={auth.login}>Continue with OpenFloat Auth</button><button onClick={()=>{localStorage.setItem(auth.tokenKey,'dev-token'); location.href='/'}}>Use local demo session</button></section>}
-function Dashboard(){const {data=[]}=useQuery({queryKey:['tx'],queryFn:()=>fetchTransactions({size:50})}); const today=new Date().toISOString().slice(0,10); const todays=data.filter((t:any)=>t.createdAt?.startsWith(today)); const volume=todays.reduce((s:number,t:any)=>s+Number(t.amount||0),0); const pending=data.filter((t:any)=>t.status==='PENDING').length; return <><section className="grid"><Card title="Today's transactions" value={todays.length}/><Card title="Total volume" value={`KES ${volume.toLocaleString()}`}/><Card title="Pending" value={pending}/></section><section className="card chart"><h3>Transaction trend</h3><ResponsiveContainer height={240}><LineChart data={data.map((t:any,i:number)=>({name:i,amount:t.amount||0}))}><Tooltip/><Line dataKey="amount" stroke="#00A650" strokeWidth={3}/></LineChart></ResponsiveContainer></section></>}
-function Card(p:{title:string;value:string|number}){return <article className="card"><p>{p.title}</p><strong>{p.value}</strong></article>}
-const stkSchema=z.object({msisdn:z.string().min(10),amount:z.coerce.number().positive(),accountReference:z.string().min(2),paybill:z.string().min(5)});
-function Payments(){const {register,handleSubmit,formState:{errors}}=useForm({resolver:zodResolver(stkSchema),defaultValues:{paybill:'174379'}}); const m=useMutation({mutationFn:initiateStkPush}); return <form className="card form" onSubmit={handleSubmit((v:any)=>m.mutate(v))}><h3>Initiate STK Push</h3>{['msisdn','amount','accountReference','paybill'].map(f=><label key={f}>{f}<input {...register(f as any)}/><small>{(errors as any)[f]?.message}</small></label>)}<button>Send prompt</button>{m.data&&<pre>{JSON.stringify(m.data,null,2)}</pre>}</form>}
-function Transactions(){const [selected,setSelected]=React.useState<string>(); const {data=[]}=useQuery({queryKey:['tx'],queryFn:()=>fetchTransactions({size:100})}); const csv=()=>{const rows=['id,msisdn,amount,status,createdAt',...data.map((t:any)=>[t.id,t.msisdn,t.amount,t.status,t.createdAt].join(','))]; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'})); a.download='transactions.csv'; a.click();}; return <section className="card"><div className="toolbar"><h3>Transaction history</h3><button onClick={csv}>Export CSV</button></div><table><tbody>{data.map((t:any)=><tr onClick={()=>setSelected(t.id)} key={t.id}><td>{t.msisdn}</td><td>KES {t.amount}</td><td><span className="pill">{t.status}</span></td><td>{t.createdAt}</td></tr>)}</tbody></table>{selected&&<TransactionDetail id={selected}/>}</section>}
-function TransactionDetail({id}:{id:string}){const {data}=useQuery({queryKey:['tx',id],queryFn:()=>fetchTransaction(id)}); return <aside className="detail"><h3>Transaction detail</h3><pre>{JSON.stringify(data,null,2)}</pre></aside>}
-function Audit(){return <section className="card"><h3>Audit log</h3><input placeholder="Search audit chain entries"/><p>Admin-only audit chain search and integrity review workspace.</p></section>}
-function Users(){const {data=[]}=useQuery({queryKey:['users'],queryFn:fetchUsers}); const {register,handleSubmit}=useForm(); const m=useMutation({mutationFn:createUser,onSuccess:()=>qc.invalidateQueries({queryKey:['users']})}); return <section className="card"><h3>User management</h3><form className="inline" onSubmit={handleSubmit((v:any)=>m.mutate(v))}><input placeholder="username" {...register('username')}/><input placeholder="email" {...register('email')}/><input placeholder="password" type="password" {...register('password')}/><select {...register('role')}><option>STAFF</option><option>ADMIN</option></select><button>Create</button></form><table><tbody>{data.map(u=><tr key={u.id}><td>{u.username}</td><td>{u.email}</td><td>{u.role}</td><td>{u.status}</td></tr>)}</tbody></table></section>}
-function Settings(){return <section className="grid"><Card title="Paybill config" value="174379"/><Card title="API clients" value="Managed in auth"/><Card title="Callback whitelist" value="Gateway enforced"/></section>}
-createRoot(document.getElementById('root')!).render(<QueryClientProvider client={qc}><Shell/></QueryClientProvider>);
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      retry: 1,
+    },
+  },
+});
+
+/* ──────────────────────────────────────────────────
+   Navigation Config
+   ────────────────────────────────────────────────── */
+interface NavItem {
+  key: string;
+  label: string;
+  icon: string;
+  adminOnly?: boolean;
+}
+
+const NAV_ITEMS: NavItem[] = [
+  { key: 'dashboard', label: 'Dashboard', icon: '📊' },
+  { key: 'payments', label: 'Payments', icon: '💳' },
+  { key: 'transactions', label: 'Transactions', icon: '📋' },
+  { key: 'audit', label: 'Audit Log', icon: '🔍', adminOnly: true },
+  { key: 'users', label: 'Users', icon: '👥', adminOnly: true },
+  { key: 'settings', label: 'Settings', icon: '⚙️', adminOnly: true },
+];
+
+/* ──────────────────────────────────────────────────
+   App Shell
+   ────────────────────────────────────────────────── */
+function AppShell() {
+  const [page, setPage] = React.useState(() => {
+    const path = location.pathname.slice(1);
+    return path || 'dashboard';
+  });
+
+  // Redirect unauthenticated users to login
+  if (!auth.isAuthenticated() || page === 'login') {
+    return <LoginPage />;
+  }
+
+  const role = auth.getRole();
+  const visibleNav = NAV_ITEMS.filter(
+    (item) => !item.adminOnly || role === 'ADMIN'
+  );
+
+  return (
+    <div className="app-shell">
+      {/* ─── Sidebar ─── */}
+      <aside className="sidebar">
+        <div className="sidebar-brand">
+          <h1>OpenFloat</h1>
+          <span>M-Pesa Operations</span>
+        </div>
+
+        <nav className="sidebar-nav">
+          {visibleNav.map((item) => (
+            <button
+              key={item.key}
+              className={page === item.key ? 'active' : ''}
+              onClick={() => setPage(item.key)}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="sidebar-signout">
+          <button onClick={auth.logout}>↪ Sign Out</button>
+        </div>
+      </aside>
+
+      {/* ─── Main Content ─── */}
+      <main className="main-content">
+        <header className="page-header">
+          <p>Secure gateway console</p>
+          <h2>{NAV_ITEMS.find((n) => n.key === page)?.label ?? page}</h2>
+        </header>
+
+        <PageRouter page={page} />
+      </main>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────
+   Page Router
+   ────────────────────────────────────────────────── */
+function PageRouter({ page }: { page: string }) {
+  switch (page) {
+    case 'dashboard':
+      return <DashboardPage />;
+    case 'payments':
+      return <PaymentInitiatePage />;
+    case 'transactions':
+      return <TransactionsStub />;
+    case 'audit':
+      return <AuditStub />;
+    case 'users':
+      return <UsersStub />;
+    case 'settings':
+      return <SettingsStub />;
+    default:
+      return <DashboardPage />;
+  }
+}
+
+/* ──────────────────────────────────────────────────
+   Stub Pages (to be replaced in next 25%)
+   ────────────────────────────────────────────────── */
+function TransactionsStub() {
+  return (
+    <div className="card">
+      <h3>Transactions</h3>
+      <p style={{ color: 'var(--color-text-muted)' }}>
+        Paginated, filterable transaction table with CSV export — coming next.
+      </p>
+    </div>
+  );
+}
+
+function AuditStub() {
+  return (
+    <div className="card">
+      <h3>Audit Log</h3>
+      <p style={{ color: 'var(--color-text-muted)' }}>
+        Admin-only searchable audit chain viewer — coming next.
+      </p>
+    </div>
+  );
+}
+
+function UsersStub() {
+  return (
+    <div className="card">
+      <h3>User Management</h3>
+      <p style={{ color: 'var(--color-text-muted)' }}>
+        Admin-only user CRUD interface — coming next.
+      </p>
+    </div>
+  );
+}
+
+function SettingsStub() {
+  return (
+    <div className="card">
+      <h3>Settings</h3>
+      <p style={{ color: 'var(--color-text-muted)' }}>
+        Paybill configuration and API client management — coming next.
+      </p>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────
+   Mount
+   ────────────────────────────────────────────────── */
+createRoot(document.getElementById('root')!).render(
+  <QueryClientProvider client={queryClient}>
+    <AppShell />
+  </QueryClientProvider>
+);
