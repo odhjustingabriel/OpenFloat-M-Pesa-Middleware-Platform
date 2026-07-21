@@ -254,10 +254,26 @@ The `AmqpConfig` declares a complete dead-letter topology:
 ### Checklist
 
 #### `openfloat-gateway` Module
-- [x] Create `openfloat-gateway/pom.xml` + add to parent pom
-- [x] Create `application.yml` with route definitions (core, auth)
-- [x] Create `IpWhitelistFilter.java` — block non-Safaricom IPs on callback routes
-- [x] Create `RequestLoggingFilter.java` — structured request/response logging
+- [x] **`openfloat-gateway/pom.xml`** — Module POM + added to parent `<modules>`
+  - File: [pom.xml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-gateway/pom.xml)
+  - Dependencies: Spring Cloud Gateway, Reactive Redis, OAuth2 Resource Server, Actuator, Micrometer Prometheus
+
+- [x] **`application.yml`** — Route definitions, Redis rate limiter, Safaricom IP config
+  - File: [application.yml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-gateway/src/main/resources/application.yml)
+  - Routes: `/api/v1/payments/**`, `/api/v1/transactions/**`, `/api/v1/mpesa/**` → core; `/oauth2/**`, `/api/v1/users/**` → auth
+  - Filters: `TokenRelay` + `RequestRateLimiter` (100 req/s burst 150)
+
+- [x] **`GatewayApplication.java`** — Main class + `userKeyResolver` bean (IP-based rate limit key)
+  - File: [GatewayApplication.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-gateway/src/main/java/com/openfloat/mpesa/gateway/GatewayApplication.java)
+
+- [x] **`GatewaySecurityConfig.java`** — Reactive WebFlux security: CSRF disabled, OAuth2 JWT resource server, public actuator/callback paths
+  - File: [GatewaySecurityConfig.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-gateway/src/main/java/com/openfloat/mpesa/gateway/config/GatewaySecurityConfig.java)
+
+- [x] **`IpWhitelistFilter.java`** — Block non-Safaricom IPs on callback routes (CIDR subnet matching)
+  - File: [IpWhitelistFilter.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-gateway/src/main/java/com/openfloat/mpesa/gateway/filter/IpWhitelistFilter.java)
+
+- [x] **`RequestLoggingFilter.java`** — Structured request logging: client_id, method, path, status, duration
+  - File: [RequestLoggingFilter.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-gateway/src/main/java/com/openfloat/mpesa/gateway/filter/RequestLoggingFilter.java)
 
 #### `openfloat-staff-portal` React SPA
 - [ ] Scaffold project with Vite + TypeScript + TanStack Query + Tailwind
@@ -310,3 +326,5 @@ The `AmqpConfig` declares a complete dead-letter topology:
 | Dynamics auth | OAuth2 CC in-process with token caching | Avoids storing pre-fetched tokens in Redis |
 | Reconciliation trigger | Nightly `@Scheduled` cron at 02:00 UTC | Low traffic window; 24h cutoff gives callbacks time to arrive |
 | SAP/Oracle auth | HTTP Basic Auth (Base64) | Matches standard SAP BAPI / Oracle REST conventions |
+| API Gateway | Spring Cloud Gateway (WebFlux) + TokenRelay | Reactive non-blocking ingress; JWT passthrough to downstream |
+| Callback IP security | CIDR subnet whitelist via `WebFilter` | Network-level isolation for Safaricom callback endpoints |
