@@ -111,7 +111,7 @@ export default function TransactionsPage() {
             placeholder="Search MSISDN, receipt, ref…"
             style={{ maxWidth: 260 }}
             value={searchTerm}
-            onChange={(e) => {
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setSearchTerm(e.target.value);
               setCurrentPage(0);
             }}
@@ -120,12 +120,12 @@ export default function TransactionsPage() {
             className="form-input"
             style={{ maxWidth: 160 }}
             value={statusFilter}
-            onChange={(e) => {
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               setStatusFilter(e.target.value);
               setCurrentPage(0);
             }}
           >
-            {STATUS_OPTIONS.map((s) => (
+            {STATUS_OPTIONS.map((s: string) => (
               <option key={s} value={s}>
                 {s === 'ALL' ? 'All Statuses' : s}
               </option>
@@ -135,12 +135,12 @@ export default function TransactionsPage() {
             className="form-input"
             style={{ maxWidth: 160 }}
             value={typeFilter}
-            onChange={(e) => {
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               setTypeFilter(e.target.value);
               setCurrentPage(0);
             }}
           >
-            {TYPE_OPTIONS.map((t) => (
+            {TYPE_OPTIONS.map((t: string) => (
               <option key={t} value={t}>
                 {t === 'ALL' ? 'All Types' : t}
               </option>
@@ -172,7 +172,7 @@ export default function TransactionsPage() {
                 </tr>
               </thead>
               <tbody>
-                {pageData.map((t) => (
+                {pageData.map((t: Transaction) => (
                   <tr
                     key={t.id}
                     onClick={() => setSelectedTxnId(t.id)}
@@ -217,14 +217,14 @@ export default function TransactionsPage() {
                 <button
                   className="btn btn-ghost btn-sm"
                   disabled={currentPage === 0}
-                  onClick={() => setCurrentPage((p) => p - 1)}
+                  onClick={() => setCurrentPage((p: number) => p - 1)}
                 >
                   ← Previous
                 </button>
                 <button
                   className="btn btn-ghost btn-sm"
                   disabled={currentPage >= totalPages - 1}
-                  onClick={() => setCurrentPage((p) => p + 1)}
+                  onClick={() => setCurrentPage((p: number) => p + 1)}
                 >
                   Next →
                 </button>

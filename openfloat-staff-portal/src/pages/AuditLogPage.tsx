@@ -71,7 +71,7 @@ export default function AuditLogPage() {
             placeholder="Search actions, entities, hashes…"
             style={{ maxWidth: 300 }}
             value={searchTerm}
-            onChange={(e) => {
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setSearchTerm(e.target.value);
               setCurrentPage(0);
             }}
@@ -80,12 +80,12 @@ export default function AuditLogPage() {
             className="form-input"
             style={{ maxWidth: 200 }}
             value={actionFilter}
-            onChange={(e) => {
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               setActionFilter(e.target.value);
               setCurrentPage(0);
             }}
           >
-            {actionTypes.map((a) => (
+            {actionTypes.map((a: string) => (
               <option key={a} value={a}>
                 {a === 'ALL' ? 'All Actions' : a}
               </option>
@@ -116,7 +116,7 @@ export default function AuditLogPage() {
                 </tr>
               </thead>
               <tbody>
-                {pageData.map((entry) => (
+                {pageData.map((entry: AuditLogEntry) => (
                   <React.Fragment key={entry.id}>
                     <tr
                       onClick={() => setExpandedId(expandedId === entry.id ? null : entry.id)}
@@ -204,14 +204,14 @@ export default function AuditLogPage() {
                 <button
                   className="btn btn-ghost btn-sm"
                   disabled={currentPage === 0}
-                  onClick={() => setCurrentPage((p) => p - 1)}
+                  onClick={() => setCurrentPage((p: number) => p - 1)}
                 >
                   ← Previous
                 </button>
                 <button
                   className="btn btn-ghost btn-sm"
                   disabled={currentPage >= totalPages - 1}
-                  onClick={() => setCurrentPage((p) => p + 1)}
+                  onClick={() => setCurrentPage((p: number) => p + 1)}
                 >
                   Next →
                 </button>
