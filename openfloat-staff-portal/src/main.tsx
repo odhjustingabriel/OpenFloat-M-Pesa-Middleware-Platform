@@ -6,6 +6,8 @@ import { auth } from './api/client';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import PaymentInitiatePage from './pages/PaymentInitiatePage';
+import TransactionsPage from './pages/TransactionsPage';
+import AuditLogPage from './pages/AuditLogPage';
 
 import './styles.css';
 
@@ -106,9 +108,9 @@ function PageRouter({ page }: { page: string }) {
     case 'payments':
       return <PaymentInitiatePage />;
     case 'transactions':
-      return <TransactionsStub />;
+      return <TransactionsPage />;
     case 'audit':
-      return <AuditStub />;
+      return <AuditLogPage />;
     case 'users':
       return <UsersStub />;
     case 'settings':
@@ -119,29 +121,8 @@ function PageRouter({ page }: { page: string }) {
 }
 
 /* ──────────────────────────────────────────────────
-   Stub Pages (to be replaced in next 25%)
+   Stub Pages (to be replaced in final 25%)
    ────────────────────────────────────────────────── */
-function TransactionsStub() {
-  return (
-    <div className="card">
-      <h3>Transactions</h3>
-      <p style={{ color: 'var(--color-text-muted)' }}>
-        Paginated, filterable transaction table with CSV export — coming next.
-      </p>
-    </div>
-  );
-}
-
-function AuditStub() {
-  return (
-    <div className="card">
-      <h3>Audit Log</h3>
-      <p style={{ color: 'var(--color-text-muted)' }}>
-        Admin-only searchable audit chain viewer — coming next.
-      </p>
-    </div>
-  );
-}
 
 function UsersStub() {
   return (
