@@ -39,7 +39,7 @@ export default function SettingsPage() {
 
   const createClientMutation = useMutation({
     mutationFn: createApiClient,
-    onSuccess: (data) => {
+    onSuccess: (data: ApiClient & { clientSecret?: string }) => {
       queryClient.invalidateQueries({ queryKey: ['api-clients'] });
       if (data.clientSecret) {
         setIssuedSecret(data.clientSecret);
@@ -68,8 +68,8 @@ export default function SettingsPage() {
   const apiClients: ApiClient[] = clientsQuery.data ?? [];
 
   const handleScopeToggle = (scope: string) => {
-    setSelectedScopes((prev) =>
-      prev.includes(scope) ? prev.filter((s) => s !== scope) : [...prev, scope]
+    setSelectedScopes((prev: string[]) =>
+      prev.includes(scope) ? prev.filter((s: string) => s !== scope) : [...prev, scope]
     );
   };
 
@@ -261,7 +261,7 @@ export default function SettingsPage() {
                   <label>Authorized Scopes</label>
                   <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
                     {['openid', 'profile', 'payments:write', 'transactions:read', 'reconciliation:write'].map(
-                      (scope) => (
+                      (scope: string) => (
                         <label
                           key={scope}
                           style={{
@@ -316,7 +316,7 @@ export default function SettingsPage() {
                 <td style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{client.clientId}</td>
                 <td>
                   <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
-                    {client.scopes.map((s) => (
+                    {client.scopes.map((s: string) => (
                       <span key={s} className="pill pill-pending" style={{ fontSize: '0.72rem' }}>
                         {s}
                       </span>
