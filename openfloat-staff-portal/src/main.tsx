@@ -8,6 +8,8 @@ import DashboardPage from './pages/DashboardPage';
 import PaymentInitiatePage from './pages/PaymentInitiatePage';
 import TransactionsPage from './pages/TransactionsPage';
 import AuditLogPage from './pages/AuditLogPage';
+import UserManagementPage from './pages/UserManagementPage';
+import SettingsPage from './pages/SettingsPage';
 
 import './styles.css';
 
@@ -112,38 +114,12 @@ function PageRouter({ page }: { page: string }) {
     case 'audit':
       return <AuditLogPage />;
     case 'users':
-      return <UsersStub />;
+      return <UserManagementPage />;
     case 'settings':
-      return <SettingsStub />;
+      return <SettingsPage />;
     default:
       return <DashboardPage />;
   }
-}
-
-/* ──────────────────────────────────────────────────
-   Stub Pages (to be replaced in final 25%)
-   ────────────────────────────────────────────────── */
-
-function UsersStub() {
-  return (
-    <div className="card">
-      <h3>User Management</h3>
-      <p style={{ color: 'var(--color-text-muted)' }}>
-        Admin-only user CRUD interface — coming next.
-      </p>
-    </div>
-  );
-}
-
-function SettingsStub() {
-  return (
-    <div className="card">
-      <h3>Settings</h3>
-      <p style={{ color: 'var(--color-text-muted)' }}>
-        Paybill configuration and API client management — coming next.
-      </p>
-    </div>
-  );
 }
 
 /* ──────────────────────────────────────────────────
