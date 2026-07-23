@@ -1,6 +1,6 @@
 # OpenFloat M-Pesa Middleware — Walkthrough & Implementation Checklist
 
-> **Status as of 2026-07-22:** Phases 1–5 are fully complete. Phase 6 (API Gateway & Staff Portal) is currently in progress (75% complete).
+> **Status as of 2026-07-23:** Phases 1–6 are fully complete. Phase 7 (Production Hardening & Go-Live) is pending.
 
 ---
 
@@ -12,7 +12,7 @@ Phase 2 — Core M-Pesa Integration Service        █████████�
 Phase 3 — Authentication & Security Hardening    ████████████ 100%  ✅
 Phase 4 — ERP Connector & Reconciliation         ████████████ 100%  ✅
 Phase 5 — Testing & Observability                ████████████ 100%  ✅
-Phase 6 — API Gateway & Staff Portal             █████████░░░  75%  🟨
+Phase 6 — API Gateway & Staff Portal             ████████████ 100%  ✅
 Phase 7 — Production Hardening & Go-Live         ░░░░░░░░░░░░   0%  ⬜
 ```
 
@@ -249,7 +249,7 @@ The `AmqpConfig` declares a complete dead-letter topology:
 
 ---
 
-## Phase 6 — API Gateway & Staff Portal 🟨
+## Phase 6 — API Gateway & Staff Portal ✅
 
 ### Checklist
 
@@ -300,8 +300,11 @@ The `AmqpConfig` declares a complete dead-letter topology:
 - [x] **`AuditLogPage`** — Admin-only searchable audit chain viewer, expandable full/previous SHA-256 hash rows, pagination
   - File: [AuditLogPage.tsx](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/pages/AuditLogPage.tsx)
 
-- [ ] `UserManagementPage` — admin-only user CRUD
-- [ ] `SettingsPage` — paybill config + API client management
+- [x] **`UserManagementPage`** — Admin-only user directory with search/role filters, Zod-validated create user form, role toggles & deletion
+  - File: [UserManagementPage.tsx](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/pages/UserManagementPage.tsx)
+
+- [x] **`SettingsPage`** — Paybill & environment config, gateway Safaricom IP whitelist table, OAuth2 API client issuing & revoking manager
+  - File: [SettingsPage.tsx](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/pages/SettingsPage.tsx)
 
 #### Infrastructure
 - [x] **`docker-compose.yml`** — Services added for gateway (8443), portal (3000), prometheus (9090), and grafana (3001)
