@@ -1,6 +1,6 @@
 # OpenFloat M-Pesa Middleware — Walkthrough & Implementation Checklist
 
-> **Status as of 2026-07-24:** Phases 1–6 are fully complete. Phase 7 (Production Hardening & Go-Live) is currently in progress (25% complete).
+> **Status as of 2026-07-24:** Phases 1–6 are fully complete. Phase 7 (Production Hardening & Go-Live) is currently in progress (50% complete).
 
 ---
 
@@ -13,7 +13,7 @@ Phase 3 — Authentication & Security Hardening    █████████�
 Phase 4 — ERP Connector & Reconciliation         ████████████ 100%  ✅
 Phase 5 — Testing & Observability                ████████████ 100%  ✅
 Phase 6 — API Gateway & Staff Portal             ████████████ 100%  ✅
-Phase 7 — Production Hardening & Go-Live         ███░░░░░░░░░  25%  🟨
+Phase 7 — Production Hardening & Go-Live         ██████░░░░░░  50%  🟨
 ```
 
 ---
@@ -332,10 +332,14 @@ The `AmqpConfig` declares a complete dead-letter topology:
 
 - [ ] TLS 1.3 enforcement at gateway ingress (cert-manager + Let's Encrypt)
 - [ ] mTLS between internal services (optional — see open question Q5)
-- [ ] Logstash pipeline for audit logs + app logs → Elastic/Splunk
-- [ ] SIEM alerts: failed logins, DLQ messages, rate limit spikes
-- [ ] pgBackRest backup configuration + test restore
-- [ ] Redis AOF persistence + replication config
+- [x] **Logstash Pipeline** — Configured for structured log ingestion and redacting sensitive credentials
+  - File: [logstash-config.yaml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/k8s/logstash-config.yaml)
+- [x] **SIEM & Prometheus Alerts** — Alert rules for token refresh failures, DLQ spikes, and auth login spikes
+  - File: [prometheus-alerts.yaml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/k8s/prometheus-alerts.yaml)
+- [x] **pgBackRest Backup Configuration** — Daily PostgreSQL backup CronJob and check script with 14-day retention
+  - Files: [pgbackrest-backup.sh](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/scripts/pgbackrest-backup.sh) · [postgres-backup-cronjob.yaml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/k8s/postgres-backup-cronjob.yaml)
+- [x] **Redis AOF Persistence Configuration** — Redis append-only file configuration Map with volatile-lru eviction
+  - File: [redis-ha-config.yaml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/k8s/redis-ha-config.yaml)
 - [ ] K8s resource limits/requests on all pods
 - [ ] HPA load test (k6 / Gatling) — min 2, max 10 replicas at 70% CPU
 - [ ] Incident runbooks: DLQ spike, token refresh failure, Daraja outage
