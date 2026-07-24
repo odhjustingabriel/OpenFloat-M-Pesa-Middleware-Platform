@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vault-agent-config
+  namespace: openfloat
+data:
+  vault-agent-config.hcl: |
+    exit_after_auth = false
+    pid_file = "/home/vault/pidfile"
+
+    auto_auth {
+      method "kubernetes" {
+        mount_path = "auth/kubernetes"
+        config = {
+          role = "openfloat-service-role"
+        }
+      }
+
+      sink "file" {
+        config = {
+          path = "/home/vault/.vault-token"
+        }
+      }
+    }
+
+    template {
+      destination = "/vault/secrets/database.env"
+      contents = <<EOH
+      SPRING_DATASOURCE_USERNAME="{{ with secret "secret/data/openfloat/db" }}{{ .Data.data.username }}{{ end }}"
+      SPRING_DATASOURCE_PASSWORD="{{ with secret "secret/data/openfloat/db" }}{{ .Data.data.password }}{{ end }}"
+      EOH
+    }
+
+    template {
+      destination = "/vault/secrets/daraja.env"
+      contents = <<EOH
+      MPESA_CONSUMER_KEY="{{ with secret "secret/data/openfloat/daraja" }}{{ .Data.data.consumer_key }}{{ end }}"
+      MPESA_CONSUMER_SECRET="{{ with secret "secret/data/openfloat/daraja" }}{{ .Data.data.consumer_secret }}{{ end }}"
+      MPESA_PASSKEY="{{ with secret "secret/data/openfloat/daraja" }}{{ .Data.data.passkey }}{{ end }}"
+      EOH
+    }

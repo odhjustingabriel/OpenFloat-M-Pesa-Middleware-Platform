@@ -1,0 +1,94 @@
+server:
+  port: 8080
+  ssl:
+    enabled: ${SSL_ENABLED:true}
+    protocol: TLS
+    enabled-protocols: TLSv1.3
+    key-store: ${SSL_KEYSTORE_PATH:classpath:keystore.p12}
+    key-store-password: ${SSL_KEYSTORE_PASSWORD:changeit}
+    key-store-type: PKCS12
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  # ── JPA / Hibernate Production Settings ──────────────────────────────────
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+
+  # ── PostgreSQL Production Pool ──────────────────────────────────────────
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres-prod.internal:5432/openfloat_mpesa_prod}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    hikari:
+      maximum-pool-size: 50
+      minimum-idle: 10
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      connection-timeout: 20000
+
+  # ── Vault Secret Management ──────────────────────────────────────────────
+  cloud:
+    vault:
+      host: ${VAULT_HOST:vault.internal}
+      port: ${VAULT_PORT:8200}
+      scheme: https
+      kv:
+        enabled: true
+        backend: secret
+        default-context: openfloat
+
+  # ── Redis Production AOF ────────────────────────────────────────────────
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:redis-prod.internal}
+      port: ${SPRING_REDIS_PORT:6379}
+      password: ${SPRING_REDIS_PASSWORD:}
+      timeout: 3000ms
+
+  # ── RabbitMQ Production AMQP ─────────────────────────────────────────────
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:rabbitmq-prod.internal}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:openfloat}
+    password: ${SPRING_RABBITMQ_PASSWORD}
+    ssl:
+      enabled: true
+
+# ── Disable Swagger UI in Production ──────────────────────────────────────
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+# ── Actuator Production Exposure ──────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+
+# ── Production Daraja Config ──────────────────────────────────────────────
+openfloat:
+  encryption:
+    key: ${OPENFLOAT_ENCRYPTION_KEY}
+
+  mpesa:
+    daraja:
+      base-url: ${MPESA_DARAJA_BASE_URL:https://api.safaricom.co.ke}
+      consumer-key: ${MPESA_CONSUMER_KEY}
+      consumer-secret: ${MPESA_CONSUMER_SECRET}
+      passkey: ${MPESA_PASSKEY}
+      shortcode: ${MPESA_SHORTCODE:174379}
+
+    rotation:
+      cron: "0 0 */6 * * *"

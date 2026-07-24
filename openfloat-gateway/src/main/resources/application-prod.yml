@@ -1,0 +1,48 @@
+server:
+  port: 8443
+  ssl:
+    enabled: ${SSL_ENABLED:true}
+    protocol: TLS
+    enabled-protocols: TLSv1.3
+    key-store: ${SSL_KEYSTORE_PATH:classpath:gateway-keystore.p12}
+    key-store-password: ${SSL_KEYSTORE_PASSWORD:changeit}
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+  application:
+    name: openfloat-gateway
+
+  cloud:
+    gateway:
+      routes:
+        - id: core-service-prod
+          uri: ${OPENFLOAT_CORE_URI:http://core-prod.internal:8080}
+          predicates:
+            - Path=/api/v1/payments/**, /api/v1/transactions/**, /api/v1/mpesa/**
+          filters:
+            - TokenRelay
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 500
+                redis-rate-limiter.burstCapacity: 1000
+                key-resolver: "#{@userKeyResolver}"
+
+        - id: auth-service-prod
+          uri: ${OPENFLOAT_AUTH_URI:http://auth-prod.internal:8081}
+          predicates:
+            - Path=/oauth2/**, /api/v1/users/**
+
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:redis-prod.internal}
+      port: ${SPRING_REDIS_PORT:6379}
+      password: ${SPRING_REDIS_PASSWORD:}
+
+# Production Safaricom Callback IP Whitelist (Excludes localhost/dev ranges)
+openfloat:
+  gateway:
+    safaricom-ip-ranges:
+      - 196.201.214.0/24
+      - 196.201.213.0/24

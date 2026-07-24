@@ -1,0 +1,24 @@
+server:
+  port: 8081
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+  application:
+    name: openfloat-auth
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres-prod.internal:5432/openfloat_mpesa_prod}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+
+openfloat:
+  auth:
+    issuer: ${AUTH_ISSUER:https://auth.openfloat.co.ke}
+    access-token-expiration-seconds: 900       # 15 minutes
+    refresh-token-expiration-seconds: 86400     # 24 hours
+    rsa-private-key-path: ${RSA_PRIVATE_KEY_PATH:/vault/secrets/rsa_private.pem}
