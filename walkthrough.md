@@ -1,6 +1,6 @@
 # OpenFloat M-Pesa Middleware — Walkthrough & Implementation Checklist
 
-> **Status as of 2026-07-24:** Phases 1–6 are fully complete. Phase 7 (Production Hardening & Go-Live) is currently in progress (50% complete).
+> **Status as of 2026-07-24:** Phases 1–6 are fully complete. Phase 7 (Production Hardening & Go-Live) is currently in progress (75% complete).
 
 ---
 
@@ -13,7 +13,7 @@ Phase 3 — Authentication & Security Hardening    █████████�
 Phase 4 — ERP Connector & Reconciliation         ████████████ 100%  ✅
 Phase 5 — Testing & Observability                ████████████ 100%  ✅
 Phase 6 — API Gateway & Staff Portal             ████████████ 100%  ✅
-Phase 7 — Production Hardening & Go-Live         ██████░░░░░░  50%  🟨
+Phase 7 — Production Hardening & Go-Live         █████████░░░  75%  🟨
 ```
 
 ---
@@ -330,18 +330,30 @@ The `AmqpConfig` declares a complete dead-letter topology:
 - [x] **Production Seed Password Rotator** — Script to generate secure production passwords and `.env.production`
   - File: [rotate-seed-passwords.sh](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/scripts/rotate-seed-passwords.sh)
 
-- [ ] TLS 1.3 enforcement at gateway ingress (cert-manager + Let's Encrypt)
-- [ ] mTLS between internal services (optional — see open question Q5)
+- [x] **cert-manager Ingress & TLS 1.3** — ClusterIssuer + Let's Encrypt production SSL configuration
+  - File: [gateway-ingress-tls.yaml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/k8s/gateway-ingress-tls.yaml)
+
+- [x] **Strict Internal mTLS Policy** — Istio PeerAuthentication & DestinationRules for pod-to-pod traffic
+  - File: [internal-mtls-policy.yaml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/k8s/internal-mtls-policy.yaml)
+
 - [x] **Logstash Pipeline** — Configured for structured log ingestion and redacting sensitive credentials
   - File: [logstash-config.yaml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/k8s/logstash-config.yaml)
+
 - [x] **SIEM & Prometheus Alerts** — Alert rules for token refresh failures, DLQ spikes, and auth login spikes
   - File: [prometheus-alerts.yaml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/k8s/prometheus-alerts.yaml)
+
 - [x] **pgBackRest Backup Configuration** — Daily PostgreSQL backup CronJob and check script with 14-day retention
   - Files: [pgbackrest-backup.sh](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/scripts/pgbackrest-backup.sh) · [postgres-backup-cronjob.yaml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/k8s/postgres-backup-cronjob.yaml)
+
 - [x] **Redis AOF Persistence Configuration** — Redis append-only file configuration Map with volatile-lru eviction
   - File: [redis-ha-config.yaml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/k8s/redis-ha-config.yaml)
-- [ ] K8s resource limits/requests on all pods
-- [ ] HPA load test (k6 / Gatling) — min 2, max 10 replicas at 70% CPU
+
+- [x] **K8s Pod Resource Limits & Security Context Hardening** — CPU/Memory requests & limits + non-root securityContext
+  - File: [pod-resource-hardening.yaml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/k8s/pod-resource-hardening.yaml)
+
+- [x] **HPA Load Testing Suite** — k6 load test script up to 100 VUs to benchmark throughput & trigger scaling
+  - File: [k6-load-test.js](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/scripts/k6-load-test.js)
+
 - [ ] Incident runbooks: DLQ spike, token refresh failure, Daraja outage
 
 ---
