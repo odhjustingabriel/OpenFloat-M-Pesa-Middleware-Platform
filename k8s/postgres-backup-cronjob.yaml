@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup-cronjob
+  namespace: openfloat
+spec:
+  schedule: "0 1 * * *" # Daily at 01:00 UTC
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: postgres-backup
+              image: postgres:16-alpine
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  echo "Starting nightly PostgreSQL backup..."
+                  pg_dump -h postgres-service.openfloat.svc.cluster.local -U openfloat_prod -d openfloat_mpesa_prod -F c -f /backups/openfloat_$(date +%Y%m%d_%H%M%S).dump
+                  echo "Backup complete. Retaining last 14 days of backups..."
+                  find /backups -name "*.dump" -mtime +14 -delete
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: openfloat-db-secret
+                      key: password
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backups
+          restartPolicy: OnFailure
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: postgres-backup-pvc

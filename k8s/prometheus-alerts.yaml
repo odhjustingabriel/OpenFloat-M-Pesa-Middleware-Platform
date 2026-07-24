@@ -1,0 +1,63 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: openfloat-alerts
+  namespace: openfloat
+  labels:
+    role: alert-rules
+    app: openfloat
+spec:
+  groups:
+    - name: openfloat.security.rules
+      rules:
+        - alert: AuthFailedLoginSpike
+          expr: sum(rate(auth_failed_login_count_total[5m])) > 10
+          for: 2m
+          labels:
+            severity: critical
+            category: security
+          annotations:
+            summary: "High rate of failed login attempts detected"
+            description: "More than 10 failed login attempts/sec over 5 minutes. Possible brute force attack on {{ $labels.instance }}."
+
+        - alert: RateLimitSpikeWarning
+          expr: sum(rate(rate_limit_rejected_count_total[5m])) > 50
+          for: 3m
+          labels:
+            severity: warning
+            category: traffic
+          annotations:
+            summary: "Rate limit rejection threshold exceeded"
+            description: "Rate limiter rejecting > 50 req/sec over 5m. API Gateway client {{ $labels.client_id }} throttling."
+
+    - name: openfloat.mpesa.rules
+      rules:
+        - alert: DarajaTokenRefreshFailed
+          expr: increase(daraja_credential_rotation_count_total{status="failure"}[15m]) > 0
+          for: 1m
+          labels:
+            severity: critical
+            category: integration
+          annotations:
+            summary: "Safaricom Daraja OAuth Token Refresh Failed"
+            description: "Daraja credential rotation job failed to obtain a new access token from Safaricom. Payments will fail soon."
+
+        - alert: DLQMessageSpike
+          expr: openfloat_erp_dlq_messages_count > 5
+          for: 5m
+          labels:
+            severity: critical
+            category: erp-sync
+          annotations:
+            summary: "ERP Dead Letter Queue (DLQ) messages accumulating"
+            description: "ERP DLQ count has exceeded 5 unhandled payment events for > 5 minutes. Manual reconciliation required."
+
+        - alert: ReconciliationMismatchSpike
+          expr: increase(reconciliation_mismatched_count_total[1h]) > 0
+          for: 1m
+          labels:
+            severity: warning
+            category: reconciliation
+          annotations:
+            summary: "M-Pesa Reconciliation Mismatch Detected"
+            description: "Nightly reconciliation scheduler detected unmatched or mismatched statement transactions."
