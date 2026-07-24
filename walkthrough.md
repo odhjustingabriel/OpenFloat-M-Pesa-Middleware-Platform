@@ -1,6 +1,6 @@
 # OpenFloat M-Pesa Middleware — Walkthrough & Implementation Checklist
 
-> **Status as of 2026-07-23:** Phases 1–6 are fully complete. Phase 7 (Production Hardening & Go-Live) is pending.
+> **Status as of 2026-07-24:** Phases 1–6 are fully complete. Phase 7 (Production Hardening & Go-Live) is currently in progress (25% complete).
 
 ---
 
@@ -13,7 +13,7 @@ Phase 3 — Authentication & Security Hardening    █████████�
 Phase 4 — ERP Connector & Reconciliation         ████████████ 100%  ✅
 Phase 5 — Testing & Observability                ████████████ 100%  ✅
 Phase 6 — API Gateway & Staff Portal             ████████████ 100%  ✅
-Phase 7 — Production Hardening & Go-Live         ░░░░░░░░░░░░   0%  ⬜
+Phase 7 — Production Hardening & Go-Live         ███░░░░░░░░░  25%  🟨
 ```
 
 ---
@@ -315,12 +315,21 @@ The `AmqpConfig` declares a complete dead-letter topology:
 
 ---
 
-## Phase 7 — Production Hardening & Go-Live ⬜
+## Phase 7 — Production Hardening & Go-Live 🟨
 
 ### Checklist
-- [ ] HashiCorp Vault integration via `spring-cloud-vault`
-- [ ] Daraja credential rotation job (`@Scheduled`)
-- [ ] Remove dev credentials from all configs for production profile
+- [x] **HashiCorp Vault Integration & Seeding** — Secret seeding script + K8s Vault Agent ConfigMap
+  - Files: [vault-seed-secrets.sh](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/scripts/vault-seed-secrets.sh) · [vault-agent-config.yaml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/k8s/vault-agent-config.yaml)
+
+- [x] **`DarajaCredentialRotationJob.java`** — Automated `@Scheduled` token rotation + Micrometer health tracking
+  - File: [DarajaCredentialRotationJob.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/integration/mpesa/DarajaCredentialRotationJob.java)
+
+- [x] **Production Application Profiles (`application-prod.yml`)** — TLS 1.3 enforcement, HikariCP prod sizing, Vault secrets, Safaricom prod IP subnets
+  - Files: [core/application-prod.yml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/resources/application-prod.yml) · [auth/application-prod.yml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-auth/src/main/resources/application-prod.yml) · [gateway/application-prod.yml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-gateway/src/main/resources/application-prod.yml)
+
+- [x] **Production Seed Password Rotator** — Script to generate secure production passwords and `.env.production`
+  - File: [rotate-seed-passwords.sh](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/scripts/rotate-seed-passwords.sh)
+
 - [ ] TLS 1.3 enforcement at gateway ingress (cert-manager + Let's Encrypt)
 - [ ] mTLS between internal services (optional — see open question Q5)
 - [ ] Logstash pipeline for audit logs + app logs → Elastic/Splunk
@@ -330,8 +339,6 @@ The `AmqpConfig` declares a complete dead-letter topology:
 - [ ] K8s resource limits/requests on all pods
 - [ ] HPA load test (k6 / Gatling) — min 2, max 10 replicas at 70% CPU
 - [ ] Incident runbooks: DLQ spike, token refresh failure, Daraja outage
-- [ ] Production callback IP whitelist updated with Safaricom production ranges
-- [ ] Default seed admin password rotated
 
 ---
 
