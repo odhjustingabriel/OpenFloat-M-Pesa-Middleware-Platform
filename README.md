@@ -82,13 +82,15 @@ An enterprise-grade, high-performance, and secure middleware platform that abstr
 
 ```
 openfloat-parent/
-├── openfloat-common/         # Shared schemas, common DTOs, custom exceptions, and crypto/phone utilities
-├── openfloat-core/           # Core M-Pesa middleware (Daraja clients, callback endpoints, and core business flow)
+├── openfloat-common/         # Shared schemas, DTOs, custom exceptions, crypto/phone utilities, and Vault provider
+├── openfloat-core/           # Core M-Pesa middleware (Daraja clients, callback endpoints, and token manager)
 ├── openfloat-auth/           # OAuth2 Spring Authorization Server & LDAP authentication module
 ├── openfloat-erp-connector/  # ERP event listener, retry coordinators, and integration adapters
-├── openfloat-gateway/        # Spring Cloud Routing & rate limit enforcement Gateway (Phase 6)
-├── openfloat-staff-portal/   # React Single Page Application (Phase 6)
-├── docker-compose.yml        # Development environment databases and brokers
+├── openfloat-gateway/        # Spring Cloud API Gateway (Routing, rate-limiting, SSL, Safaricom IP whitelist)
+├── openfloat-staff-portal/   # React Single Page Application (Vite, TS, TanStack Query, Recharts, Tailwind)
+├── k8s/                      # Production K8s manifests, logstash pipeline configs, and Prometheus alert rules
+├── scripts/                  # Vault seeding, credential/password rotation, and pgBackRest backup scripts
+├── docker-compose.yml        # Development database, brokers, Prometheus/Grafana stack
 └── pom.xml                   # Master Maven parent POM
 ```
 
@@ -99,13 +101,15 @@ openfloat-parent/
 | Layer | Technology | Version |
 | :--- | :--- | :--- |
 | **Language** | Java (JDK) | 21 |
-| **Framework** | Spring Boot | 3.3.x |
+| **Backend Framework** | Spring Boot | 3.3.x |
 | **Security** | Spring Security, Spring Authorization Server | 6.3.x |
 | **Database** | PostgreSQL | 16 |
 | **Cache & Throttling** | Redis | 7 |
 | **Message Broker** | RabbitMQ | 3.12+ |
 | **Flyway Migrations** | Flyway | 10.x |
-| **API Docs** | OpenAPI 3, Swagger UI | 2.5.0 |
+| **Portal Frontend** | React, TypeScript, TanStack Query, Vite, Recharts, Tailwind CSS | Latest |
+| **Secret Management** | HashiCorp Vault, Spring Cloud Vault | Latest |
+| **Observability** | Prometheus, Grafana, Logstash, ElasticSearch | Latest |
 
 ---
 
@@ -114,10 +118,11 @@ openfloat-parent/
 ### Prerequisites
 * **Java 21** or higher
 * **Maven 3.9+**
+* **Node.js 18+** & **npm 9+**
 * **Docker & Docker Compose**
 
 ### 1. Launch Infrastructure Components
-Start the PostgreSQL, Redis, and RabbitMQ containers locally:
+Start the PostgreSQL, Redis, RabbitMQ, and monitoring containers locally:
 ```bash
 docker-compose up -d
 ```
@@ -125,15 +130,17 @@ Verify containers are running:
 * **PostgreSQL:** Port `5432` (Database: `openfloat_mpesa`, User/Pass: `openfloat` / `openfloat_dev_2024`)
 * **Redis:** Port `6379`
 * **RabbitMQ:** Port `5672` (Management Dashboard: `http://localhost:15672` with `guest`/`guest`)
+* **Prometheus:** Port `9090`
+* **Grafana:** Port `3001`
 
-### 2. Build the Maven Workspace
-Compile and bundle all services from the parent directory:
+### 2. Build the Workspace
+Compile and bundle all backend services from the parent directory:
 ```bash
 mvn clean package -DskipTests
 ```
 
-### 3. Run the Services
-To launch the complete middleware platform locally, open separate terminal windows and run:
+### 3. Run the Backend Services
+Launch the complete middleware platform locally (open separate terminals):
 
 #### Start the Authorization Server (Port 8081)
 ```bash
@@ -152,6 +159,30 @@ mvn spring-boot:run
 cd openfloat-erp-connector
 mvn spring-boot:run
 ```
+
+#### Start the API Gateway (Port 8443)
+```bash
+cd openfloat-gateway
+mvn spring-boot:run
+```
+
+### 4. Run the Staff Portal Frontend
+Install dependencies and run the Vite development server (Port 3000):
+```bash
+cd openfloat-staff-portal
+npm install
+npm run dev
+```
+
+---
+
+## Production Hardening & Deployment
+
+For production deployments, the following utilities are provided:
+* **Secrets Seeding:** Run `./scripts/vault-seed-secrets.sh` to initialize HashiCorp Vault KV v2 secret engine paths.
+* **Credential Rotation:** Run `./scripts/rotate-seed-passwords.sh` to rotate default database passwords and generate `.env.production`.
+* **Automated Backups:** Nightly database backup CronJob configuration is located in `k8s/postgres-backup-cronjob.yaml`.
+* **K8s Deployments:** Production configurations for services, routing, and HPA autoscaling are located in the `k8s/` directory.
 
 ---
 
