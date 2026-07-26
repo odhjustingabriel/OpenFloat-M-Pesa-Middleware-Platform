@@ -18,8 +18,9 @@ public class GatewayApplication {
         return exchange -> {
             // Resolve rate limit key by remote IP address
             String ipAddress = "unknown";
-            if (exchange.getRequest().getRemoteAddress() != null) {
-                ipAddress = exchange.getRequest().getRemoteAddress().getAddress().getHostAddress();
+            java.net.InetSocketAddress remoteAddress = exchange.getRequest().getRemoteAddress();
+            if (remoteAddress != null) {
+                ipAddress = remoteAddress.getAddress().getHostAddress();
             }
             return Mono.just(ipAddress);
         };

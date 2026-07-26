@@ -10,6 +10,8 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
+import org.springframework.lang.NonNull;
+
 import java.net.InetSocketAddress;
 import java.util.List;
 
@@ -21,7 +23,8 @@ public class IpWhitelistFilter implements WebFilter {
     private List<String> whitelistedRanges;
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+    @NonNull
+    public Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
 

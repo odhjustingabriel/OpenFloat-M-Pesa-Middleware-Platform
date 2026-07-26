@@ -2,6 +2,7 @@ package com.openfloat.mpesa.gateway.filter;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
@@ -16,7 +17,9 @@ import reactor.core.publisher.Mono;
 public class RequestLoggingFilter implements WebFilter {
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+    @NonNull
+    @SuppressWarnings("null")
+    public Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
         long startTime = System.currentTimeMillis();
         ServerHttpRequest request = exchange.getRequest();
         String method = request.getMethod().name();
