@@ -142,15 +142,15 @@ mvn clean package -DskipTests
 ### 3. Run the Backend Services
 Launch the complete middleware platform locally (open separate terminals):
 
-#### Start the Authorization Server (Port 8081)
+#### Start the Core Middleware Service (Port 8080) — *Runs Flyway DB Migrations*
 ```bash
-cd openfloat-auth
+cd openfloat-core
 mvn spring-boot:run
 ```
 
-#### Start the Core Middleware Service (Port 8080)
+#### Start the Authorization Server (Port 8081)
 ```bash
-cd openfloat-core
+cd openfloat-auth
 mvn spring-boot:run
 ```
 

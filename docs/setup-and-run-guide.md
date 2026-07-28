@@ -164,19 +164,19 @@ docker compose up -d postgres redis rabbitmq mailpit prometheus grafana
 
 ### Step 4.3: Launch Microservices (Open 4 Terminal Windows)
 
-* **Terminal 1 — Authorization Server (`openfloat-auth`):**
-  ```bash
-  cd openfloat-auth
-  mvn spring-boot:run
-  ```
-  *(Starts on `http://localhost:8081`)*
-
-* **Terminal 2 — Core Payment Service (`openfloat-core`):**
+* **Terminal 1 — Core Payment Service (`openfloat-core`):**
   ```bash
   cd openfloat-core
   mvn spring-boot:run
   ```
-  *(Starts on `http://localhost:8080` — auto-runs Flyway SQL migrations)*
+  *(Starts on `http://localhost:8080` — initializes database schema via Flyway migrations)*
+
+* **Terminal 2 — Authorization Server (`openfloat-auth`):**
+  ```bash
+  cd openfloat-auth
+  mvn spring-boot:run
+  ```
+  *(Starts on `http://localhost:8081` — validates database schema created by core)*
 
 * **Terminal 3 — ERP Connector Service (`openfloat-erp-connector`):**
   ```bash
@@ -522,7 +522,7 @@ curl -X GET http://localhost:8080/api/v1/audit/verify \
 ### Q4: `401 Unauthorized` on All API Requests
 * **Symptom:** Every request returns `HTTP 401` even with a Bearer token.
 * **Cause:** The `openfloat-auth` service is not running, so JWT validation fails at the resource server.
-* **Fix:** Ensure `openfloat-auth` is started **before** `openfloat-core` and `openfloat-gateway`. The auth server must be reachable at `http://localhost:8081` for JWKS key fetching.
+* **Fix:** Ensure `openfloat-core` is started first (to run Flyway database migrations), followed by `openfloat-auth` (reachable at `http://localhost:8081` for JWKS key fetching) before accessing endpoints via `openfloat-gateway`.
 
 ### Q5: RabbitMQ `queue.erp.sync.dlq` Filling Up
 * **Symptom:** Messages accumulate in the dead letter queue and are not processed.
