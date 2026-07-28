@@ -1,5 +1,6 @@
 package com.openfloat.mpesa.gateway.filter;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.lang.NonNull;
 
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -20,7 +22,15 @@ import java.util.List;
 public class IpWhitelistFilter implements WebFilter {
 
     @Value("${openfloat.gateway.safaricom-ip-ranges}")
+    private String whitelistedRangesRaw;
+
     private List<String> whitelistedRanges;
+
+    @PostConstruct
+    public void init() {
+        this.whitelistedRanges = Arrays.asList(whitelistedRangesRaw.split(","));
+        log.info("IP Whitelist initialized with {} Safaricom CIDR ranges", whitelistedRanges.size());
+    }
 
     @Override
     @NonNull

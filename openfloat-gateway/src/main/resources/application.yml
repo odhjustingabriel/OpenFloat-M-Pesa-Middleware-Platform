@@ -61,8 +61,4 @@ management:
 # Configurable Safaricom IP ranges for Whitelisting on M-Pesa Callback routes
 openfloat:
   gateway:
-    safaricom-ip-ranges:
-      - 196.201.214.0/24
-      - 196.201.213.0/24
-      - 196.201.212.0/24
-      - 127.0.0.1/32
+    safaricom-ip-ranges: "196.201.214.0/24,196.201.213.0/24,196.201.212.0/24,127.0.0.1/32"

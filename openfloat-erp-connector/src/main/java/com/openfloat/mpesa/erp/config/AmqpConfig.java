@@ -43,8 +43,8 @@ public class AmqpConfig {
 
     // ── Routing keys ──────────────────────────────────────────────────────
 
-    public static final String ROUTING_KEY_ERP_SYNC     = "erp.sync";
-    public static final String ROUTING_KEY_ERP_SYNC_DLQ = "erp.sync.dlq";
+    public static final String ROUTING_KEY_ERP_SYNC     = "transaction.completed";
+    public static final String ROUTING_KEY_ERP_SYNC_DLQ = "dlq.erp";
 
     // ── Exchanges ─────────────────────────────────────────────────────────
 
