@@ -34,7 +34,7 @@ public class AmqpConfig {
     // ── Exchange names ────────────────────────────────────────────────────
 
     public static final String EXCHANGE_TRANSACTION_COMPLETED = "exchange.transaction.completed";
-    public static final String EXCHANGE_TRANSACTION_DLX       = "exchange.transaction.dlx";
+    public static final String EXCHANGE_TRANSACTION_DLX       = "exchange.dlx";
 
     // ── Queue names ───────────────────────────────────────────────────────
 
@@ -53,8 +53,8 @@ public class AmqpConfig {
      * Must match the exchange declared in openfloat-core's RabbitMQ config.
      */
     @Bean
-    public DirectExchange transactionCompletedExchange() {
-        return ExchangeBuilder.directExchange(EXCHANGE_TRANSACTION_COMPLETED)
+    public TopicExchange transactionCompletedExchange() {
+        return ExchangeBuilder.topicExchange(EXCHANGE_TRANSACTION_COMPLETED)
                 .durable(true)
                 .build();
     }
@@ -64,8 +64,8 @@ public class AmqpConfig {
      * routed here by RabbitMQ's dead-lettering mechanism.
      */
     @Bean
-    public DirectExchange transactionDlxExchange() {
-        return ExchangeBuilder.directExchange(EXCHANGE_TRANSACTION_DLX)
+    public TopicExchange transactionDlxExchange() {
+        return ExchangeBuilder.topicExchange(EXCHANGE_TRANSACTION_DLX)
                 .durable(true)
                 .build();
     }
@@ -97,7 +97,7 @@ public class AmqpConfig {
 
     /** Binds the ERP sync queue to the main exchange. */
     @Bean
-    public Binding erpSyncBinding(Queue erpSyncQueue, DirectExchange transactionCompletedExchange) {
+    public Binding erpSyncBinding(Queue erpSyncQueue, TopicExchange transactionCompletedExchange) {
         return BindingBuilder.bind(erpSyncQueue)
                 .to(transactionCompletedExchange)
                 .with(ROUTING_KEY_ERP_SYNC);
@@ -105,7 +105,7 @@ public class AmqpConfig {
 
     /** Binds the DLQ to the DLX exchange. */
     @Bean
-    public Binding erpSyncDlqBinding(Queue erpSyncDlqQueue, DirectExchange transactionDlxExchange) {
+    public Binding erpSyncDlqBinding(Queue erpSyncDlqQueue, TopicExchange transactionDlxExchange) {
         return BindingBuilder.bind(erpSyncDlqQueue)
                 .to(transactionDlxExchange)
                 .with(ROUTING_KEY_ERP_SYNC_DLQ);
