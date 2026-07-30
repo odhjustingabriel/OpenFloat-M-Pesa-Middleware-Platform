@@ -1,6 +1,6 @@
 # OpenFloat M-Pesa Middleware — Walkthrough & Implementation Checklist
 
-> **Status as of 2026-07-24:** All 7 implementation phases (Phases 1–7) are 100% complete! The platform is production-hardened and go-live ready.
+> **Status as of 2026-07-30:** Core platform is running. Phase 8 (Multi-Tenant Client Application Registration, Dynamic Account Reference Routing, Webhook Dispatching & Reconciliation Engine) has been scoped based on supervisor feedback and is currently in progress.
 
 ---
 
@@ -14,6 +14,7 @@ Phase 4 — ERP Connector & Reconciliation         █████████�
 Phase 5 — Testing & Observability                ████████████ 100%  ✅
 Phase 6 — API Gateway & Staff Portal             ████████████ 100%  ✅
 Phase 7 — Production Hardening & Go-Live         ████████████ 100%  ✅
+Phase 8 — Multi-Tenant Routing & Webhooks        ░░░░░░░░░░░░   0%  🔲 (Outstanding)
 ```
 
 ---
@@ -359,6 +360,39 @@ The `AmqpConfig` declares a complete dead-letter topology:
 
 - [x] **Go-Live Automated Verification Suite** — Script to programmatically verify readiness across all 7 platform phases
   - File: [go-live-checklist-verify.sh](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/scripts/go-live-checklist-verify.sh)
+
+---
+
+## Phase 8 — Multi-Tenant Architecture & Dynamic Webhook Dispatching 🔲 (Outstanding / In Progress)
+
+### Overview & Supervisor Requirements
+This phase addresses multi-tenant client registration, dynamic Account Reference generation, automatic webhook routing per client application, enhanced Admin/Manager roles, and end-to-end payment reconciliation.
+
+### Checklist
+
+- [ ] **`V5__client_applications_schema.sql`** — DB migration for `client_applications` and `account_reference_mappings`
+  - Target Path: `openfloat-core/src/main/resources/db/migration/V5__client_applications_schema.sql`
+
+- [ ] **`ClientApp.java` + `ClientAppRepository.java`** — Entity and repository for registered client systems (websites/apps)
+  - Target Path: `openfloat-core/src/main/java/com/openfloat/mpesa/entity/ClientApp.java`
+
+- [ ] **`ClientAppService.java` + `ClientAppController.java`** — Admin/Manager endpoints to register, view, update, and suspend client applications (`POST /api/v1/clients`, `GET /api/v1/clients`, `PUT /api/v1/clients/{id}/status`)
+  - Target Path: `openfloat-core/src/main/java/com/openfloat/mpesa/service/ClientAppService.java`
+
+- [ ] **`AccountReferenceService.java` + `AccountReferenceController.java`** — Dynamic reference generator (`ECOMM-8X92K`) linking AccountRef $\rightarrow$ Client App $\rightarrow$ Callback URL (`POST /api/v1/references/generate`)
+  - Target Path: `openfloat-core/src/main/java/com/openfloat/mpesa/service/AccountReferenceService.java`
+
+- [ ] **`WebhookDispatcherService.java`** — Real-time Webhook router extracting target client `callbackUrl` upon Paybill C2B payment ingestion, with HMAC signature security & retry logic
+  - Target Path: `openfloat-core/src/main/java/com/openfloat/mpesa/service/WebhookDispatcherService.java`
+
+- [ ] **`WebhookLog` Entity + `WebhookRedriveController.java`** — Logs outgoing webhook attempts to client apps and allows Managers to manually re-trigger failed webhooks
+  - Target Path: `openfloat-core/src/main/java/com/openfloat/mpesa/controller/WebhookRedriveController.java`
+
+- [ ] **`ReconciliationService.java` + `ReconciliationController.java`** — Payment reconciliation engine for matching C2B/STK payments against generated Account References and resolving discrepancies
+  - Target Path: `openfloat-core/src/main/java/com/openfloat/mpesa/service/ReconciliationService.java`
+
+- [ ] **Staff Portal UI Extensions** — Client Management page, Account References generator view, Webhook Dispatch console, and Manager Reconciliation Dashboard
+  - Target Directory: `openfloat-staff-portal/src/pages/`
 
 ---
 

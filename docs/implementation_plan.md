@@ -1,12 +1,12 @@
 # OpenFloat M-Pesa Middleware Platform — Implementation Plan (Updated)
 
-> **Last Updated:** 2026-07-24 | **Progress:** All 7 Phases (Phases 1–7) ✅ 100% Complete · Platform Go-Live Ready
+> **Last Updated:** 2026-07-30 | **Progress:** Phases 1–7 ✅ 100% Complete · Phase 8 🔲 In Progress (Multi-Tenant Routing & Webhooks)
 
 ---
 
 ## Background
 
-The platform is a multi-module Java/Spring Boot 3.3 Maven monorepo targeting Safaricom's Daraja API suite. Phases 1 through 4 have been fully implemented — shared foundation, all four M-Pesa payment flows, complete security/auth stack, ERP connector with retry/DLQ, and the nightly reconciliation scheduler.
+The platform is a multi-module Java/Spring Boot 3.3 Maven monorepo targeting Safaricom's Daraja API suite. Phases 1 through 7 have been fully implemented (shared foundation, core M-Pesa flows, security/auth, ERP connector, gateway, observability, and staff portal). Based on supervisor feedback, **Phase 8** expands the architecture into a **Multi-Tenant Payment Middleware Hub** with client application registration, dynamic Account Reference generation, automatic client webhook dispatching, and manager reconciliation workflows.
 
 ---
 
@@ -15,12 +15,12 @@ The platform is a multi-module Java/Spring Boot 3.3 Maven monorepo targeting Saf
 | Module | Status | Completion | Notes |
 |---|---|---|---|
 | `openfloat-common` | ✅ Complete | 100% | DTOs, exceptions, `EncryptionUtils`, `HashUtils`, `IdempotencyKeyGenerator`, event model |
-| `openfloat-core` | ✅ Complete | 100% | All payment flows, callbacks, audit chain, security, rate limiting, reconciliation scheduler |
+| `openfloat-core` | 🔲 Phase 8 | 85% | Multi-tenant client registration, dynamic account reference generator, webhook dispatcher pending |
 | `openfloat-auth` | ✅ Complete | 100% | OAuth2 AS, role-claim JWT, LDAP config, user status endpoints, resource server |
 | `openfloat-erp-connector` | ✅ Complete | 100% | All adapters complete, DLX/DLQ topology, retry TTL, DLQ alert listener |
 | `openfloat-gateway` | ✅ Complete | 100% | Spring Cloud Gateway routes, OAuth2 resource server, Redis rate limiting, IP whitelist, request logging |
-| `openfloat-staff-portal` | ✅ Complete | 100% | React/Vite/TypeScript staff portal with operational pages, dark Safaricom-themed UI, CSV export |
-| Test suites | ✅ Complete | 100% | Unit test coverage for all services, aspect logic, and repositories; Testcontainers suites for payment, rate limiting, and ERP sync |
+| `openfloat-staff-portal` | 🔲 Phase 8 | 85% | Client App Management, Reference Generator UI, Webhook Logs Console, and Manager Reconciliation UI pending |
+| Test suites | ✅ Complete | 100% | Unit test coverage for all services, aspect logic, and repositories |
 | Kubernetes / Helm | ✅ Complete | 100% | Kubernetes manifests for namespace, config, secrets, deployments, services, ingress, and core HPA |
 | Observability stack | ✅ Complete | 100% | Prometheus scrape config, Grafana provisioning/dashboard, app metric tags, and custom Micrometer metrics added |
 
@@ -267,13 +267,38 @@ graph TD
     P5 --> P6["Phase 6: Gateway & Portal ⬜"]
     P6 --> P7["Phase 7: Production ⬜"]
 ```
+## 🔲 OUTSTANDING — Phase 8: Multi-Tenant Architecture & Dynamic Webhook Dispatching
+
+### Goal
+Transform the platform from single-tenant integration into a **Multi-Tenant Payment Middleware Hub** where Admins and Managers register client applications (websites, mobile apps), generate dynamic Account References, dynamically route M-Pesa C2B Paybill payments to client Webhook URLs, and manage end-to-end reconciliation.
+
+### Proposed Changes
+
+#### 1. Database Schema Migrations (`openfloat-core`)
+- `V5__client_applications_schema.sql`:
+  - `client_applications` table (`id`, `client_id`, `client_name`, `api_key_hash`, `callback_url`, `account_prefix`, `status`, `created_by`, `created_at`, `updated_at`)
+  - `account_reference_mappings` table (`id`, `account_reference`, `client_app_id`, `requested_amount`, `callback_url`, `status`, `expires_at`, `created_at`)
+  - `webhook_delivery_logs` table (`id`, `transaction_id`, `client_app_id`, `target_url`, `http_status`, `payload`, `error_message`, `attempt_count`, `created_at`)
+
+#### 2. Backend Services & Controllers (`openfloat-core`)
+- `ClientAppService.java` & `ClientAppController.java`: Register new tenant apps, assign prefixes, update callback URLs, suspend client apps (`POST /api/v1/clients`, `GET /api/v1/clients`, `PUT /api/v1/clients/{id}/status`).
+- `AccountReferenceService.java` & `AccountReferenceController.java`: Generate unique trackable Account References (`ECOMM-8X92K4`) with TTL (`POST /api/v1/references/generate`).
+- `WebhookDispatcherService.java`: Extends callback ingestion to extract target client `callbackUrl` from `AccountReferenceMapping`, construct secure HMAC-signed Webhook payloads, and dispatch notifications with exponential backoff.
+- `WebhookRedriveController.java`: Endpoint for Managers to view delivery logs and redrive failed webhooks (`POST /api/v1/webhooks/{id}/redrive`).
+- `ReconciliationService.java` & `ReconciliationController.java`: Match payments against generated references, flag discrepancies, and execute Manager manual overrides (`POST /api/v1/reconciliation/override`).
+
+#### 3. Staff Portal UI Views (`openfloat-staff-portal`)
+- `ClientManagementPage.tsx`: Manage tenant applications, API credentials, and callback URLs.
+- `AccountReferencesPage.tsx`: Generate Account References and monitor payment status.
+- `WebhookLogsPage.tsx`: Monitor outgoing webhooks and re-trigger failed notifications.
+- `ReconciliationPage.tsx`: Discrepancy management dashboard and Manager override controls.
 
 ---
 
 ## Open Questions
 
 > [!IMPORTANT]
-> **Q1 — LDAP/AD Server:** Available in dev environment, or stub with embedded Apache DS?
+> **Q1 — Account Reference TTL:** Default expiration window for generated references (e.g. 24 hours)?
 
 > [!IMPORTANT]
 > **Q2 — ERP Target:** Which ERP system is the primary integration target? (SAP / Oracle / Dynamics / Custom) — determines adapter to prioritise in production config.
