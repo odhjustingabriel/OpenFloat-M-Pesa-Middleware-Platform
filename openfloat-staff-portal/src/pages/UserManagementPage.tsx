@@ -117,7 +117,7 @@ export default function UserManagementPage() {
           <div className="toolbar">
             <h4 style={{ margin: 0 }}>Create New User</h4>
             <button className="btn btn-ghost btn-sm" onClick={() => setShowCreateModal(false)}>
-              ✕ Close
+              Close
             </button>
           </div>
 
@@ -171,7 +171,7 @@ export default function UserManagementPage() {
 
             {createMutation.isError && (
               <div className="result-block error" style={{ marginTop: '0.75rem' }}>
-                ❌ {(createMutation.error as Error)?.message ?? 'Failed to create user'}
+                Error: {(createMutation.error as Error)?.message ?? 'Failed to create user'}
               </div>
             )}
           </form>

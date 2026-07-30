@@ -33,12 +33,12 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { key: 'dashboard', label: 'Dashboard', icon: '📊' },
-  { key: 'payments', label: 'Payments', icon: '💳' },
-  { key: 'transactions', label: 'Transactions', icon: '📋' },
-  { key: 'audit', label: 'Audit Log', icon: '🔍', adminOnly: true },
-  { key: 'users', label: 'Users', icon: '👥', adminOnly: true },
-  { key: 'settings', label: 'Settings', icon: '⚙️', adminOnly: true },
+  { key: 'dashboard', label: 'Dashboard', icon: 'D' },
+  { key: 'payments', label: 'Payments', icon: 'P' },
+  { key: 'transactions', label: 'Transactions', icon: 'T' },
+  { key: 'audit', label: 'Audit Log', icon: 'A', adminOnly: true },
+  { key: 'users', label: 'Users', icon: 'U', adminOnly: true },
+  { key: 'settings', label: 'Settings', icon: 'S', adminOnly: true },
 ];
 
 /* ──────────────────────────────────────────────────

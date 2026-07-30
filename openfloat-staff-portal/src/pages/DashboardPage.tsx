@@ -72,7 +72,7 @@ export default function DashboardPage() {
           <span className="stat-label">Success Rate</span>
           <span className="stat-value">{stats?.successRate ?? '—'}%</span>
           <span className={`stat-change ${(stats?.successRate ?? 0) >= 90 ? 'positive' : 'negative'}`}>
-            {(stats?.successRate ?? 0) >= 90 ? '✓ Healthy' : '⚠ Below threshold'}
+            {(stats?.successRate ?? 0) >= 90 ? 'Healthy' : 'Below threshold'}
           </span>
         </div>
       </div>

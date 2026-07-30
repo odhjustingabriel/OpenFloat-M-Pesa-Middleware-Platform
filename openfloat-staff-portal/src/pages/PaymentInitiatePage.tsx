@@ -158,14 +158,14 @@ export default function PaymentInitiatePage() {
       {/* ─── Mutation Error ─── */}
       {mutation.isError && (
         <div className="result-block error">
-          ❌ Error: {(mutation.error as Error)?.message ?? 'Failed to initiate STK Push'}
+          Error: {(mutation.error as Error)?.message ?? 'Failed to initiate STK Push'}
         </div>
       )}
 
       {/* ─── Initial Result ─── */}
       {activeResult && (
         <div className="result-block success">
-          <strong>STK Push Initiated ✓</strong>
+          <strong>STK Push Initiated</strong>
           {'\n'}Transaction ID: {activeResult.transactionId}
           {'\n'}Checkout Request: {activeResult.checkoutRequestId}
           {'\n'}Merchant Request: {activeResult.merchantRequestId}

@@ -5,7 +5,7 @@ export default function LoginPage() {
   return (
     <div className="login-page">
       <div className="card login-card">
-        <div className="brand-icon">🔐</div>
+        <div className="brand-icon">OF</div>
         <h1>OpenFloat Staff Portal</h1>
         <p>
           Enterprise M-Pesa middleware operations console.
@@ -15,7 +15,7 @@ export default function LoginPage() {
 
         <div className="login-buttons">
           <button className="btn btn-primary" onClick={auth.login}>
-            🔑 Continue with OpenFloat Auth
+            Continue with OpenFloat Auth
           </button>
 
           <div className="login-divider">or</div>

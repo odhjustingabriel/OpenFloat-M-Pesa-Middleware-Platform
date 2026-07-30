@@ -171,7 +171,6 @@ function TimelineStep({ label, active }: { label: string; active: boolean }) {
         color: active ? 'var(--color-brand-300)' : 'var(--color-text-muted)',
       }}
     >
-      <span>{active ? '✓' : '○'}</span>
       {label}
     </div>
   );

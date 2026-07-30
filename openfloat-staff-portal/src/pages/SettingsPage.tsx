@@ -133,7 +133,7 @@ export default function SettingsPage() {
                   color: paybillConfig.passkeyConfigured ? 'var(--color-brand-300)' : 'var(--color-warning)',
                 }}
               >
-                <span>{paybillConfig.passkeyConfigured ? '✓ Encrypted in Vault' : '⚠ Missing Passkey'}</span>
+                <span>{paybillConfig.passkeyConfigured ? 'Encrypted in Vault' : 'Missing Passkey'}</span>
               </div>
             </div>
 
@@ -222,7 +222,7 @@ export default function SettingsPage() {
                   setIssuedSecret(null);
                 }}
               >
-                ✕ Close
+                Close
               </button>
             </div>
 
