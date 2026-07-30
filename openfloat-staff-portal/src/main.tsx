@@ -28,17 +28,16 @@ const queryClient = new QueryClient({
 interface NavItem {
   key: string;
   label: string;
-  icon: string;
   adminOnly?: boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { key: 'dashboard', label: 'Dashboard', icon: 'D' },
-  { key: 'payments', label: 'Payments', icon: 'P' },
-  { key: 'transactions', label: 'Transactions', icon: 'T' },
-  { key: 'audit', label: 'Audit Log', icon: 'A', adminOnly: true },
-  { key: 'users', label: 'Users', icon: 'U', adminOnly: true },
-  { key: 'settings', label: 'Settings', icon: 'S', adminOnly: true },
+  { key: 'dashboard', label: 'Dashboard' },
+  { key: 'payments', label: 'Payments' },
+  { key: 'transactions', label: 'Transactions' },
+  { key: 'audit', label: 'Audit Log', adminOnly: true },
+  { key: 'users', label: 'Users', adminOnly: true },
+  { key: 'settings', label: 'Settings', adminOnly: true },
 ];
 
 /* ──────────────────────────────────────────────────
@@ -76,14 +75,13 @@ function AppShell() {
               className={page === item.key ? 'active' : ''}
               onClick={() => setPage(item.key)}
             >
-              <span className="nav-icon">{item.icon}</span>
               {item.label}
             </button>
           ))}
         </nav>
 
         <div className="sidebar-signout">
-          <button onClick={auth.logout}>↪ Sign Out</button>
+          <button onClick={auth.logout}>Sign Out</button>
         </div>
       </aside>
 

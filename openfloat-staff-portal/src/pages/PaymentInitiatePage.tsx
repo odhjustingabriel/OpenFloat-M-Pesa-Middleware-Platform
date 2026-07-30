@@ -150,7 +150,7 @@ export default function PaymentInitiatePage() {
               <span className="spinner" /> Sending…
             </>
           ) : (
-            '📲 Send STK Prompt'
+            'Send STK Prompt'
           )}
         </button>
       </form>

@@ -28,7 +28,7 @@ export default function LoginPage() {
               location.href = '/';
             }}
           >
-            🧪 Use local demo session
+            Use local demo session
           </button>
         </div>
       </div>
