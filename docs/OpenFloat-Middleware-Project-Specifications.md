@@ -160,6 +160,10 @@ Can initiate STK Push and B2C transactions.
 
 Can access reconciliation tools and export financial data.
 
+**MANAGER**
+
+Can register client applications, manage webhook callback URLs, re-trigger failed webhooks, and execute manual reconciliation overrides.
+
 **ADMIN**
 
 Can manage:
@@ -167,6 +171,7 @@ Can manage:
 - Users
 - Credentials
 - Paybill configurations
+- Client applications
 - System settings
 
 **M-Pesa Integration Service**
@@ -321,7 +326,7 @@ Features:
 - Pagination
 - Sorting
 
-**Internal Callback Endpoint**
+**Internal & Client Webhook Dispatch**
 
 **Endpoint**
 
@@ -329,7 +334,32 @@ POST /api/v1/callbacks
 
 Purpose:
 
-- Forward final transaction results to internal applications.
+- Forward final transaction webhooks to registered client application callback URLs dynamically based on the generated `AccountReference`.
+
+**Generate Account Reference**
+
+**Endpoint**
+
+POST /api/v1/references/generate
+
+Purpose:
+
+- Generate a unique, trackable Account Reference (`ECOMM-8X92K4`) linked to a registered client app and callback URL before payment.
+
+**Client Application Management**
+
+**Endpoints**
+
+POST /api/v1/clients (Register client app & callback URL)
+GET /api/v1/clients (List registered client applications)
+PUT /api/v1/clients/{id}/status (Enable / suspend client app)
+
+**Webhook Redrive & Reconciliation Overrides**
+
+**Endpoints**
+
+POST /api/v1/webhooks/{id}/redrive (Re-trigger failed client webhook)
+POST /api/v1/reconciliation/override (Manager manual payment reconciliation)
 
 **Callback Endpoints**
 
@@ -419,17 +449,63 @@ processed_payload JSONB
 
 received_at
 
-**api_clients**
+**client_applications**
 
 id UUID
 
 client_id
 
-client_secret
+client_name
+
+api_key_hash
+
+callback_url
+
+account_prefix
 
 status
 
 rate_limit
+
+created_by
+
+created_at
+
+**account_reference_mappings**
+
+id UUID
+
+account_reference
+
+client_app_id
+
+requested_amount
+
+callback_url
+
+status
+
+expires_at
+
+created_at
+
+**webhook_delivery_logs**
+
+id UUID
+
+transaction_id
+
+client_app_id
+
+target_url
+
+http_status
+
+payload
+
+error_message
+
+attempt_count
 
 created_at
 
@@ -712,9 +788,15 @@ Expose:
 - Integration testing with Testcontainers
 - Minimum 80% code coverage
 
+**Core Multi-Tenant Architecture**
+
+- Multi-tenant client system registration (Websites & Apps)
+- Dynamic Account Reference generation & Paybill C2B payment routing
+- Dynamic Webhook dispatching to client callback URLs with HMAC signatures
+- Manager & Admin payment reconciliation dashboard
+
 **Future Enhancements**
 
-- Multi-tenant support
 - Multi-country mobile money integrations
 - Payment analytics dashboard
 - Fraud detection engine
