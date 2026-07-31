@@ -48,19 +48,36 @@ public class SecurityConfig {
                     "/v3/api-docs/**",
                     "/actuator/**"
                 ).permitAll()
-                
+
                 // M-Pesa callbacks are public since Safaricom doesn't send OAuth tokens
                 .requestMatchers("/api/v1/mpesa/callbacks/**").permitAll()
-                
+
                 // Transactions search & retrieval
-                .requestMatchers("/api/v1/transactions/**").hasAnyRole("ADMIN", "OPERATOR", "FINANCE", "VIEWER")
-                
+                .requestMatchers("/api/v1/transactions/**").hasAnyRole("ADMIN", "MANAGER", "OPERATOR", "FINANCE", "VIEWER")
+
                 // STK Push and B2C Payment triggers
                 .requestMatchers("/api/v1/payments/stk-push", "/api/v1/payments/b2c").hasAnyRole("ADMIN", "OPERATOR")
-                
+
                 // Reversals & configurations
                 .requestMatchers("/api/v1/payments/reversal").hasAnyRole("ADMIN", "FINANCE")
-                
+
+                // ── Phase 8: Multi-Tenant Client & Webhook Management ──────────────
+
+                // Client application management (register, view, update status)
+                .requestMatchers("/api/v1/clients/**").hasAnyRole("ADMIN", "MANAGER")
+
+                // Account Reference generation and lookup
+                .requestMatchers("/api/v1/references/**").hasAnyRole("ADMIN", "MANAGER")
+
+                // Webhook delivery log view and redrive
+                .requestMatchers("/api/v1/webhooks/**").hasAnyRole("ADMIN", "MANAGER")
+
+                // Manual reconciliation overrides
+                .requestMatchers("/api/v1/reconciliation/override").hasAnyRole("ADMIN", "MANAGER")
+
+                // Automated reconciliation reports (Finance can view, not override)
+                .requestMatchers("/api/v1/reconciliation/**").hasAnyRole("ADMIN", "MANAGER", "FINANCE")
+
                 // Default secure
                 .anyRequest().authenticated()
             )

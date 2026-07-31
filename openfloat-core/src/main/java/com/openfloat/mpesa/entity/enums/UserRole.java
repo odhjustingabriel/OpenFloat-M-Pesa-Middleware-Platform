@@ -14,6 +14,12 @@ public enum UserRole {
     /** Can access reconciliation tools and export financial data */
     FINANCE,
 
-    /** Full administrative access: users, credentials, paybill configs, system settings */
+    /**
+     * Can register client applications, manage webhook callback URLs,
+     * re-trigger failed webhooks, and execute manual reconciliation overrides.
+     */
+    MANAGER,
+
+    /** Full administrative access: users, credentials, paybill configs, client apps, system settings */
     ADMIN
 }

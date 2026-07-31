@@ -14,7 +14,7 @@ Phase 4 — ERP Connector & Reconciliation         █████████�
 Phase 5 — Testing & Observability                ████████████ 100%  ✅
 Phase 6 — API Gateway & Staff Portal             ████████████ 100%  ✅
 Phase 7 — Production Hardening & Go-Live         ████████████ 100%  ✅
-Phase 8 — Multi-Tenant Routing & Webhooks        ░░░░░░░░░░░░   0%  🔲 (Outstanding)
+Phase 8 — Multi-Tenant Routing & Webhooks        █████████░░░  75%  🔄 (Backend Complete)
 ```
 
 ---
@@ -370,26 +370,26 @@ This phase addresses multi-tenant client registration, dynamic Account Reference
 
 ### Checklist
 
-- [ ] **`V5__client_applications_schema.sql`** — DB migration for `client_applications` and `account_reference_mappings`
-  - Target Path: `openfloat-core/src/main/resources/db/migration/V5__client_applications_schema.sql`
+- [x] **`V5__client_applications_schema.sql`** — DB migration for `client_applications`, `account_reference_mappings`, and `webhook_delivery_logs`
+  - File: [V5__client_applications_schema.sql](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/resources/db/migration/V5__client_applications_schema.sql)
 
-- [ ] **`ClientApp.java` + `ClientAppRepository.java`** — Entity and repository for registered client systems (websites/apps)
-  - Target Path: `openfloat-core/src/main/java/com/openfloat/mpesa/entity/ClientApp.java`
+- [x] **`ClientApp.java` + `ClientAppRepository.java`** — Entity and repository for registered client systems (websites/apps)
+  - Files: [ClientApp.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/entity/ClientApp.java) · [ClientAppRepository.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/repository/ClientAppRepository.java)
 
-- [ ] **`ClientAppService.java` + `ClientAppController.java`** — Admin/Manager endpoints to register, view, update, and suspend client applications (`POST /api/v1/clients`, `GET /api/v1/clients`, `PUT /api/v1/clients/{id}/status`)
-  - Target Path: `openfloat-core/src/main/java/com/openfloat/mpesa/service/ClientAppService.java`
+- [x] **`ClientAppService.java` + `ClientAppController.java`** — Admin/Manager endpoints to register, view, update, and suspend client applications (`POST /api/v1/clients`, `GET /api/v1/clients`, `PUT /api/v1/clients/{id}/status`)
+  - Files: [ClientAppService.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/service/ClientAppService.java) · [ClientAppController.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/controller/ClientAppController.java)
 
-- [ ] **`AccountReferenceService.java` + `AccountReferenceController.java`** — Dynamic reference generator (`ECOMM-8X92K`) linking AccountRef $\rightarrow$ Client App $\rightarrow$ Callback URL (`POST /api/v1/references/generate`)
-  - Target Path: `openfloat-core/src/main/java/com/openfloat/mpesa/service/AccountReferenceService.java`
+- [x] **`AccountReferenceService.java` + `AccountReferenceController.java`** — Dynamic reference generator (`ECOMM-8X92K`) linking AccountRef $\rightarrow$ Client App $\rightarrow$ Callback URL (`POST /api/v1/references/generate`)
+  - Files: [AccountReferenceService.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/service/AccountReferenceService.java) · [AccountReferenceController.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/controller/AccountReferenceController.java)
 
-- [ ] **`WebhookDispatcherService.java`** — Real-time Webhook router extracting target client `callbackUrl` upon Paybill C2B payment ingestion, with HMAC signature security & retry logic
-  - Target Path: `openfloat-core/src/main/java/com/openfloat/mpesa/service/WebhookDispatcherService.java`
+- [x] **`WebhookDispatcherService.java`** — Real-time Webhook router extracting target client `callbackUrl` upon Paybill C2B payment ingestion, with HMAC signature security & retry logic
+  - File: [WebhookDispatcherService.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/service/WebhookDispatcherService.java)
 
-- [ ] **`WebhookLog` Entity + `WebhookRedriveController.java`** — Logs outgoing webhook attempts to client apps and allows Managers to manually re-trigger failed webhooks
-  - Target Path: `openfloat-core/src/main/java/com/openfloat/mpesa/controller/WebhookRedriveController.java`
+- [x] **`WebhookLog` Entity + `WebhookRedriveController.java`** — Logs outgoing webhook attempts to client apps and allows Managers to manually re-trigger failed webhooks
+  - Files: [WebhookDeliveryLog.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/entity/WebhookDeliveryLog.java) · [WebhookRedriveController.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/controller/WebhookRedriveController.java)
 
-- [ ] **`ReconciliationService.java` + `ReconciliationController.java`** — Payment reconciliation engine for matching C2B/STK payments against generated Account References and resolving discrepancies
-  - Target Path: `openfloat-core/src/main/java/com/openfloat/mpesa/service/ReconciliationService.java`
+- [x] **`ReconciliationService.java` + `ReconciliationController.java`** — Payment reconciliation engine for matching C2B/STK payments against generated Account References and resolving discrepancies
+  - Files: [ReconciliationService.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/service/ReconciliationService.java) · [ReconciliationController.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/controller/ReconciliationController.java)
 
 - [ ] **Staff Portal UI Extensions** — Client Management page, Account References generator view, Webhook Dispatch console, and Manager Reconciliation Dashboard
   - Target Directory: `openfloat-staff-portal/src/pages/`

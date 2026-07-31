@@ -31,6 +31,7 @@ public class CallbackService {
     private final TransactionRepository transactionRepository;
     private final CallbackRepository callbackRepository;
     private final TransactionEventPublisher eventPublisher;
+    private final WebhookDispatcherService webhookDispatcherService;
     private final TransactionMapper transactionMapper;
     private final CallbackMapper callbackMapper;
     private final MeterRegistry meterRegistry;
@@ -108,6 +109,9 @@ public class CallbackService {
             // 4. Publish Event to RabbitMQ
             publishTransactionCompleted(transaction);
 
+            // 5. Dispatch Webhook to registered ClientApp (if mapped)
+            webhookDispatcherService.dispatchWebhookForTransaction(transaction);
+
         } catch (Exception e) {
             log.error("Failed to parse and process STK Callback: {}", e.getMessage(), e);
             throw new IllegalArgumentException("Invalid STK callback payload structure", e);
@@ -171,6 +175,9 @@ public class CallbackService {
 
         // Publish event
         publishTransactionCompleted(transaction);
+
+        // Dispatch Webhook to registered ClientApp
+        webhookDispatcherService.dispatchWebhookForTransaction(transaction);
 
         return Map.of("ResultCode", "0", "ResultDescription", "Success");
     }

@@ -15,7 +15,7 @@ The platform is a multi-module Java/Spring Boot 3.3 Maven monorepo targeting Saf
 | Module | Status | Completion | Notes |
 |---|---|---|---|
 | `openfloat-common` | ✅ Complete | 100% | DTOs, exceptions, `EncryptionUtils`, `HashUtils`, `IdempotencyKeyGenerator`, event model |
-| `openfloat-core` | 🔲 Phase 8 | 85% | Multi-tenant client registration, dynamic account reference generator, webhook dispatcher pending |
+| `openfloat-core` | ✅ Complete | 100% | Multi-tenant client registration, dynamic reference generator, HMAC webhook dispatcher complete |
 | `openfloat-auth` | ✅ Complete | 100% | OAuth2 AS, role-claim JWT, LDAP config, user status endpoints, resource server |
 | `openfloat-erp-connector` | ✅ Complete | 100% | All adapters complete, DLX/DLQ topology, retry TTL, DLQ alert listener |
 | `openfloat-gateway` | ✅ Complete | 100% | Spring Cloud Gateway routes, OAuth2 resource server, Redis rate limiting, IP whitelist, request logging |
