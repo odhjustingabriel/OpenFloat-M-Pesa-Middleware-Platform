@@ -37,8 +37,8 @@ export const auth = {
 
   /** Initiate OAuth2 PKCE authorization code flow */
   login() {
-    const base = import.meta.env.VITE_AUTH_BASE_URL ?? '';
-    const clientId = import.meta.env.VITE_OAUTH_CLIENT_ID ?? 'openfloat-staff-portal';
+    const base = import.meta.env.VITE_AUTH_BASE_URL || 'http://localhost:8081';
+    const clientId = import.meta.env.VITE_OAUTH_CLIENT_ID || 'openfloat-staff-portal';
     const redirect = encodeURIComponent(`${location.origin}/oauth/callback`);
     const state = crypto.randomUUID();
     sessionStorage.setItem('oauth_state', state);
