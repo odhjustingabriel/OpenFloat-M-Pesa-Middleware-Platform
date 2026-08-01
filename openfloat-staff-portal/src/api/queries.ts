@@ -183,3 +183,153 @@ export async function fetchDashboardSummary(): Promise<DashboardSummary> {
     };
   }
 }
+
+/* ── Phase 8: Multi-Tenant & Client Applications ────── */
+
+export interface ClientApp {
+  id: string;
+  clientName: string;
+  accountPrefix: string;
+  callbackUrl: string;
+  status: 'ACTIVE' | 'SUSPENDED';
+  registeredBy: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface ClientAppRegistrationResult extends ClientApp {
+  apiKey: string;
+  webhookSecret: string;
+}
+
+export async function fetchClientApps(): Promise<ClientApp[]> {
+  try {
+    const { data } = await api.get('/api/v1/clients');
+    return data.data ?? data;
+  } catch {
+    return [
+      {
+        id: '1',
+        clientName: 'XYZ School Portal',
+        accountPrefix: 'SCH',
+        callbackUrl: 'https://school.example.com/api/payment-webhook',
+        status: 'ACTIVE',
+        registeredBy: 'admin',
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: '2',
+        clientName: 'Acme E-Commerce Store',
+        accountPrefix: 'ECOMM',
+        callbackUrl: 'https://acme.example.com/webhooks/mpesa',
+        status: 'ACTIVE',
+        registeredBy: 'manager',
+        createdAt: new Date().toISOString(),
+      },
+    ];
+  }
+}
+
+export async function registerClientApp(payload: {
+  clientName: string;
+  accountPrefix: string;
+  callbackUrl: string;
+  notes?: string;
+}): Promise<ClientAppRegistrationResult> {
+  const { data } = await api.post('/api/v1/clients', payload);
+  return data.data ?? data;
+}
+
+export async function updateClientAppStatus(id: string, status: string): Promise<ClientApp> {
+  const { data } = await api.put(`/api/v1/clients/${id}/status`, { status });
+  return data.data ?? data;
+}
+
+export async function updateClientAppCallbackUrl(id: string, callbackUrl: string): Promise<ClientApp> {
+  const { data } = await api.put(`/api/v1/clients/${id}/callback-url`, { callbackUrl });
+  return data.data ?? data;
+}
+
+/* ── Phase 8: Dynamic Account References ─────────────── */
+
+export interface AccountReferenceMappingDto {
+  id: string;
+  accountReference: string;
+  clientAppId: string;
+  clientAppName: string;
+  accountPrefix: string;
+  callbackUrl: string;
+  requestedAmount?: number;
+  currency: string;
+  description?: string;
+  status: 'PENDING' | 'PAID' | 'EXPIRED' | 'CANCELLED';
+  expiresAt: string;
+  paidAt?: string;
+  transactionId?: string;
+  createdAt: string;
+}
+
+export async function generateAccountReference(payload: {
+  accountPrefix: string;
+  requestedAmount?: number;
+  description?: string;
+  callbackUrlOverride?: string;
+  ttlMinutes?: number;
+}): Promise<AccountReferenceMappingDto> {
+  const { data } = await api.post('/api/v1/references/generate', payload);
+  return data.data ?? data;
+}
+
+export async function fetchClientAccountReferences(clientAppId: string): Promise<AccountReferenceMappingDto[]> {
+  try {
+    const { data } = await api.get(`/api/v1/references/client/${clientAppId}`);
+    return data.data ?? data;
+  } catch {
+    return [];
+  }
+}
+
+/* ── Phase 8: Webhook Monitoring & Redrive ───────────── */
+
+export interface WebhookDeliveryLogDto {
+  id: string;
+  transactionId?: string;
+  clientAppId: string;
+  clientName: string;
+  accountReference?: string;
+  targetUrl: string;
+  httpStatus?: number;
+  requestPayload: String;
+  responseBody?: string;
+  errorMessage?: string;
+  attemptNumber: number;
+  success: boolean;
+  deliveredAt?: string;
+  createdAt: string;
+}
+
+export async function fetchFailedWebhooks(): Promise<WebhookDeliveryLogDto[]> {
+  try {
+    const { data } = await api.get('/api/v1/webhooks/failed');
+    return data.data ?? data;
+  } catch {
+    return [];
+  }
+}
+
+export async function redriveWebhook(logId: string): Promise<WebhookDeliveryLogDto> {
+  const { data } = await api.post(`/api/v1/webhooks/${logId}/redrive`);
+  return data.data ?? data;
+}
+
+/* ── Phase 8: Reconciliation Manual Override ─────────── */
+
+export async function executeReconciliationOverride(payload: {
+  accountReference: string;
+  transactionId?: string;
+  reason: string;
+}): Promise<{ status: string; message: string }> {
+  const { data } = await api.post('/api/v1/reconciliation/override', payload);
+  return data.data ?? data;
+}

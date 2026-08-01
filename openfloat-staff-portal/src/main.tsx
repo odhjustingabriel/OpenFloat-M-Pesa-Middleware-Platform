@@ -10,6 +10,10 @@ import TransactionsPage from './pages/TransactionsPage';
 import AuditLogPage from './pages/AuditLogPage';
 import UserManagementPage from './pages/UserManagementPage';
 import SettingsPage from './pages/SettingsPage';
+import ClientManagementPage from './pages/ClientManagementPage';
+import AccountReferencesPage from './pages/AccountReferencesPage';
+import WebhookLogsPage from './pages/WebhookLogsPage';
+import ReconciliationPage from './pages/ReconciliationPage';
 
 import './styles.css';
 
@@ -28,16 +32,20 @@ const queryClient = new QueryClient({
 interface NavItem {
   key: string;
   label: string;
-  adminOnly?: boolean;
+  allowedRoles?: string[];
 }
 
 const NAV_ITEMS: NavItem[] = [
   { key: 'dashboard', label: 'Dashboard' },
   { key: 'payments', label: 'Payments' },
   { key: 'transactions', label: 'Transactions' },
-  { key: 'audit', label: 'Audit Log', adminOnly: true },
-  { key: 'users', label: 'Users', adminOnly: true },
-  { key: 'settings', label: 'Settings', adminOnly: true },
+  { key: 'clients', label: 'Client Apps', allowedRoles: ['ADMIN', 'MANAGER'] },
+  { key: 'references', label: 'Account References', allowedRoles: ['ADMIN', 'MANAGER'] },
+  { key: 'webhooks', label: 'Webhook Logs', allowedRoles: ['ADMIN', 'MANAGER'] },
+  { key: 'reconciliation', label: 'Reconciliation', allowedRoles: ['ADMIN', 'MANAGER', 'FINANCE'] },
+  { key: 'audit', label: 'Audit Log', allowedRoles: ['ADMIN'] },
+  { key: 'users', label: 'Users', allowedRoles: ['ADMIN'] },
+  { key: 'settings', label: 'Settings', allowedRoles: ['ADMIN'] },
 ];
 
 /* ──────────────────────────────────────────────────
@@ -56,7 +64,7 @@ function AppShell() {
 
   const role = auth.getRole();
   const visibleNav = NAV_ITEMS.filter(
-    (item) => !item.adminOnly || role === 'ADMIN'
+    (item) => !item.allowedRoles || item.allowedRoles.includes(role)
   );
 
   return (
@@ -109,6 +117,14 @@ function PageRouter({ page }: { page: string }) {
       return <PaymentInitiatePage />;
     case 'transactions':
       return <TransactionsPage />;
+    case 'clients':
+      return <ClientManagementPage />;
+    case 'references':
+      return <AccountReferencesPage />;
+    case 'webhooks':
+      return <WebhookLogsPage />;
+    case 'reconciliation':
+      return <ReconciliationPage />;
     case 'audit':
       return <AuditLogPage />;
     case 'users':
