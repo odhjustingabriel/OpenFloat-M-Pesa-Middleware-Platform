@@ -12,17 +12,34 @@ The platform is a multi-module Java/Spring Boot 3.3 Maven monorepo targeting Saf
 
 ## Module Status — Current State
 
+## Module Status — Current State
+
 | Module | Status | Completion | Notes |
 |---|---|---|---|
 | `openfloat-common` | ✅ Complete | 100% | DTOs, exceptions, `EncryptionUtils`, `HashUtils`, `IdempotencyKeyGenerator`, event model |
 | `openfloat-core` | ✅ Complete | 100% | Multi-tenant client registration, dynamic reference generator, HMAC webhook dispatcher complete |
-| `openfloat-auth` | ✅ Complete | 100% | OAuth2 AS, role-claim JWT, LDAP config, user status endpoints, resource server |
+| `openfloat-auth` | ✅ Complete | 100% | OAuth2 AS, role-claim JWT, LDAP config, user status endpoints, PKCE client registration |
 | `openfloat-erp-connector` | ✅ Complete | 100% | All adapters complete, DLX/DLQ topology, retry TTL, DLQ alert listener |
 | `openfloat-gateway` | ✅ Complete | 100% | Spring Cloud Gateway routes, OAuth2 resource server, Redis rate limiting, IP whitelist, request logging |
-| `openfloat-staff-portal` | 🔲 Phase 8 | 85% | Client App Management, Reference Generator UI, Webhook Logs Console, and Manager Reconciliation UI pending |
+| `openfloat-staff-portal` | ✅ Complete | 100% | Client App Management, Reference Generator UI, Webhook Logs Console, and Manager Reconciliation UI |
 | Test suites | ✅ Complete | 100% | Unit test coverage for all services, aspect logic, and repositories |
 | Kubernetes / Helm | ✅ Complete | 100% | Kubernetes manifests for namespace, config, secrets, deployments, services, ingress, and core HPA |
 | Observability stack | ✅ Complete | 100% | Prometheus scrape config, Grafana provisioning/dashboard, app metric tags, and custom Micrometer metrics added |
+
+---
+
+## 🎯 Full Project Specification & Scope Traceability Matrix
+
+The OpenFloat Middleware Platform fulfills 100% of the project scope requirements:
+
+| Specification Requirement | Architectural Module | Implementation Files & Details |
+|---|---|---|
+| **1. Complete M-Pesa API Suite**<br>• C2B (Receive payments)<br>• B2C (Disbursements)<br>• Reversals<br>• STK Push (Lipa na M-Pesa)<br>• Validation & Confirmation Callbacks | `openfloat-core` | • `PaymentController.java`, `C2BService.java`, `B2CService.java`, `ReversalService.java`, `StkPushService.java`<br>• `MpesaCallbackController.java` & `CallbackService.java`<br>• Signature verification & Safaricom IP subnet whitelisting |
+| **2. Callback Handling & Idempotency** | `openfloat-core` | • Callbacks land on middleware, validated, deduplicated, and mapped<br>• `ConversationID`, `OriginatorConversationID`, `CheckoutRequestID`, `IdempotencyKey` enforced in `Transaction.java` & `IdempotencyKeyGenerator.java` |
+| **3. Unified Versioned RESTful API**<br>• `POST /api/v1/payments/stk-push`<br>• `GET /api/v1/transactions/{id}`<br>• `GET /api/v1/transactions`<br>• `POST /api/v1/callbacks` | `openfloat-core` & `openfloat-gateway` | • `PaymentController.java`, `TransactionController.java`<br>• `WebhookDispatcherService.java`<br>• Rate limiting per client-ID (`RateLimitFilter.java`)<br>• OpenAPI 3.0 (Swagger UI at `/swagger-ui.html`) |
+| **4. Real-Time ERP & Finance Posting** | `openfloat-erp-connector` | • Event-driven RabbitMQ `TransactionCompletedEvent`<br>• Configurable adapters for SAP, Oracle, Microsoft Dynamics 365, & Custom REST<br>• Automated reconciliation (`reconciliation_id`) & `ReconciliationScheduler.java`<br>• Exponential backoff retry, dead-letter queue (DLQ) topology, & `DlqAlertListener.java` |
+| **5. Standalone Staff Portal** | `openfloat-staff-portal` | • React SPA communicating exclusively with internal REST API<br>• Initiate STK Push & B2C payment forms (`PaymentInitiatePage.tsx`)<br>• Real-time payment status & transaction history search (`TransactionsPage.tsx`)<br>• Multi-tenant client system registration (`ClientManagementPage.tsx`)<br>• Dynamic reference generator (`AccountReferencesPage.tsx`)<br>• Webhook delivery & redrive console (`WebhookLogsPage.tsx`)<br>• Manager reconciliation dashboard (`ReconciliationPage.tsx`) |
+| **6. Enterprise Security & RBAC** | `openfloat-auth` & `openfloat-core` | • LDAP / Active Directory integration (`LdapConfig.java`)<br>• Roles: `VIEWER`, `OPERATOR`, `ADMIN`, `FINANCE`, `MANAGER`<br>• TLS 1.3 network traffic & AES-256-GCM encryption at rest for PII (`EncryptedStringConverter.java`)<br>• Tamper-proof audit logging (`AuditAspect.java`, `HashUtils.chainedHash`) |
 
 ---
 
