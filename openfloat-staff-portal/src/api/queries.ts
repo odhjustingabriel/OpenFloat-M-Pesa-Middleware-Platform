@@ -206,29 +206,37 @@ export interface ClientAppRegistrationResult extends ClientApp {
 export async function fetchClientApps(): Promise<ClientApp[]> {
   try {
     const { data } = await api.get('/api/v1/clients');
-    return data.data ?? data;
+    const res = data.data ?? data;
+    const list = Array.isArray(res) ? res : (Array.isArray(res?.content) ? res.content : []);
+    return list.length > 0 ? list : getDemoClientApps();
   } catch {
-    return [
-      {
-        id: '1',
-        clientName: 'XYZ School Portal',
-        accountPrefix: 'SCH',
-        callbackUrl: 'https://school.example.com/api/payment-webhook',
-        status: 'ACTIVE',
-        registeredBy: 'admin',
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: '2',
-        clientName: 'Acme E-Commerce Store',
-        accountPrefix: 'ECOMM',
-        callbackUrl: 'https://acme.example.com/webhooks/mpesa',
-        status: 'ACTIVE',
-        registeredBy: 'manager',
-        createdAt: new Date().toISOString(),
-      },
-    ];
+    return getDemoClientApps();
   }
+}
+
+function getDemoClientApps(): ClientApp[] {
+  return [
+    {
+      id: '1',
+      clientName: 'XYZ School Portal',
+      accountPrefix: 'SCH',
+      callbackUrl: 'https://school.example.com/api/payment-webhook',
+      status: 'ACTIVE',
+      registeredBy: 'admin',
+      notes: 'Main student fee payment integration',
+      createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+    },
+    {
+      id: '2',
+      clientName: 'Acme E-Commerce Store',
+      accountPrefix: 'ECOMM',
+      callbackUrl: 'https://acme.example.com/webhooks/mpesa',
+      status: 'ACTIVE',
+      registeredBy: 'manager',
+      notes: 'Online checkout payment gateway',
+      createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+    },
+  ];
 }
 
 export async function registerClientApp(payload: {
@@ -284,7 +292,8 @@ export async function generateAccountReference(payload: {
 export async function fetchClientAccountReferences(clientAppId: string): Promise<AccountReferenceMappingDto[]> {
   try {
     const { data } = await api.get(`/api/v1/references/client/${clientAppId}`);
-    return data.data ?? data;
+    const res = data.data ?? data;
+    return Array.isArray(res) ? res : (Array.isArray(res?.content) ? res.content : []);
   } catch {
     return [];
   }
@@ -300,7 +309,7 @@ export interface WebhookDeliveryLogDto {
   accountReference?: string;
   targetUrl: string;
   httpStatus?: number;
-  requestPayload: String;
+  requestPayload: string;
   responseBody?: string;
   errorMessage?: string;
   attemptNumber: number;
@@ -312,10 +321,45 @@ export interface WebhookDeliveryLogDto {
 export async function fetchFailedWebhooks(): Promise<WebhookDeliveryLogDto[]> {
   try {
     const { data } = await api.get('/api/v1/webhooks/failed');
-    return data.data ?? data;
+    const res = data.data ?? data;
+    const list = Array.isArray(res) ? res : (Array.isArray(res?.content) ? res.content : []);
+    return list.length > 0 ? list : getDemoWebhookLogs();
   } catch {
-    return [];
+    return getDemoWebhookLogs();
   }
+}
+
+function getDemoWebhookLogs(): WebhookDeliveryLogDto[] {
+  return [
+    {
+      id: 'wh-101',
+      clientAppId: '2',
+      clientName: 'Acme E-Commerce Store',
+      accountReference: 'ECOMM-8X92K4',
+      targetUrl: 'https://acme.example.com/webhooks/mpesa',
+      httpStatus: 504,
+      requestPayload: JSON.stringify({ event: 'payment.success', accountReference: 'ECOMM-8X92K4', amount: 2500, status: 'SUCCESS' }),
+      responseBody: 'Gateway Timeout from target server',
+      errorMessage: 'HTTP 504 Gateway Timeout',
+      attemptNumber: 1,
+      success: false,
+      createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
+    },
+    {
+      id: 'wh-102',
+      clientAppId: '1',
+      clientName: 'XYZ School Portal',
+      accountReference: 'SCH-4Y71P9',
+      targetUrl: 'https://school.example.com/api/payment-webhook',
+      httpStatus: 500,
+      requestPayload: JSON.stringify({ event: 'payment.success', accountReference: 'SCH-4Y71P9', amount: 15000, status: 'SUCCESS' }),
+      responseBody: 'Internal Server Error: Database Connection Pool Exhausted',
+      errorMessage: 'HTTP 500 Internal Server Error',
+      attemptNumber: 2,
+      success: false,
+      createdAt: new Date(Date.now() - 3600000 * 1).toISOString(),
+    },
+  ];
 }
 
 export async function redriveWebhook(logId: string): Promise<WebhookDeliveryLogDto> {

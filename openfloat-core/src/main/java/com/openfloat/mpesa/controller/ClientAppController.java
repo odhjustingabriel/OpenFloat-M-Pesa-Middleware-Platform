@@ -1,5 +1,6 @@
 package com.openfloat.mpesa.controller;
 
+import com.openfloat.mpesa.common.dto.ApiResponse;
 import com.openfloat.mpesa.dto.ClientAppRegistrationDto;
 import com.openfloat.mpesa.dto.ClientAppRegistrationResultDto;
 import com.openfloat.mpesa.dto.ClientAppResponseDto;
@@ -32,13 +33,13 @@ public class ClientAppController {
      */
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    public ResponseEntity<ClientAppRegistrationResultDto> registerClient(
+    public ResponseEntity<ApiResponse<ClientAppRegistrationResultDto>> registerClient(
             @Valid @RequestBody ClientAppRegistrationDto dto,
             Authentication authentication) {
 
         String registeredBy = authentication != null ? authentication.getName() : "ADMIN";
         ClientAppRegistrationResultDto result = clientAppService.registerClientApp(dto, registeredBy);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(result, "Client application registered successfully"));
     }
 
     /**
@@ -46,8 +47,8 @@ public class ClientAppController {
      */
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    public ResponseEntity<List<ClientAppResponseDto>> listClients() {
-        return ResponseEntity.ok(clientAppService.getAllClientApps());
+    public ResponseEntity<ApiResponse<List<ClientAppResponseDto>>> listClients() {
+        return ResponseEntity.ok(ApiResponse.success(clientAppService.getAllClientApps()));
     }
 
     /**
@@ -55,8 +56,8 @@ public class ClientAppController {
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    public ResponseEntity<ClientAppResponseDto> getClient(@PathVariable UUID id) {
-        return ResponseEntity.ok(clientAppService.getClientAppById(id));
+    public ResponseEntity<ApiResponse<ClientAppResponseDto>> getClient(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success(clientAppService.getClientAppById(id)));
     }
 
     /**
@@ -64,12 +65,12 @@ public class ClientAppController {
      */
     @PutMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    public ResponseEntity<ClientAppResponseDto> updateStatus(
+    public ResponseEntity<ApiResponse<ClientAppResponseDto>> updateStatus(
             @PathVariable UUID id,
             @RequestBody Map<String, String> body) {
 
         String status = body.get("status");
-        return ResponseEntity.ok(clientAppService.updateClientStatus(id, status));
+        return ResponseEntity.ok(ApiResponse.success(clientAppService.updateClientStatus(id, status)));
     }
 
     /**
@@ -77,11 +78,11 @@ public class ClientAppController {
      */
     @PutMapping("/{id}/callback-url")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    public ResponseEntity<ClientAppResponseDto> updateCallbackUrl(
+    public ResponseEntity<ApiResponse<ClientAppResponseDto>> updateCallbackUrl(
             @PathVariable UUID id,
             @RequestBody Map<String, String> body) {
 
         String callbackUrl = body.get("callbackUrl");
-        return ResponseEntity.ok(clientAppService.updateCallbackUrl(id, callbackUrl));
+        return ResponseEntity.ok(ApiResponse.success(clientAppService.updateCallbackUrl(id, callbackUrl)));
     }
 }

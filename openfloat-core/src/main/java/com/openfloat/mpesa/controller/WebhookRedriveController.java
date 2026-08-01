@@ -1,5 +1,6 @@
 package com.openfloat.mpesa.controller;
 
+import com.openfloat.mpesa.common.dto.ApiResponse;
 import com.openfloat.mpesa.dto.WebhookDeliveryLogDto;
 import com.openfloat.mpesa.entity.WebhookDeliveryLog;
 import com.openfloat.mpesa.repository.WebhookDeliveryLogRepository;
@@ -32,12 +33,13 @@ public class WebhookRedriveController {
      */
     @GetMapping("/failed")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    public ResponseEntity<List<WebhookDeliveryLogDto>> getFailedWebhooks(
+    public ResponseEntity<ApiResponse<List<WebhookDeliveryLogDto>>> getFailedWebhooks(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
 
         Page<WebhookDeliveryLog> logs = logRepository.findAllFailed(PageRequest.of(page, size));
-        return ResponseEntity.ok(logs.stream().map(this::mapToDto).collect(Collectors.toList()));
+        List<WebhookDeliveryLogDto> list = logs.stream().map(this::mapToDto).collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(list));
     }
 
     /**
@@ -45,13 +47,14 @@ public class WebhookRedriveController {
      */
     @GetMapping("/client/{clientAppId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    public ResponseEntity<List<WebhookDeliveryLogDto>> getLogsByClientApp(
+    public ResponseEntity<ApiResponse<List<WebhookDeliveryLogDto>>> getLogsByClientApp(
             @PathVariable UUID clientAppId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
 
         Page<WebhookDeliveryLog> logs = logRepository.findAllByClientAppIdOrderByCreatedAtDesc(clientAppId, PageRequest.of(page, size));
-        return ResponseEntity.ok(logs.stream().map(this::mapToDto).collect(Collectors.toList()));
+        List<WebhookDeliveryLogDto> list = logs.stream().map(this::mapToDto).collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(list));
     }
 
     /**
@@ -59,9 +62,9 @@ public class WebhookRedriveController {
      */
     @PostMapping("/{logId}/redrive")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    public ResponseEntity<WebhookDeliveryLogDto> redriveWebhook(@PathVariable UUID logId) {
+    public ResponseEntity<ApiResponse<WebhookDeliveryLogDto>> redriveWebhook(@PathVariable UUID logId) {
         WebhookDeliveryLog newLog = dispatcherService.redriveWebhook(logId);
-        return ResponseEntity.ok(mapToDto(newLog));
+        return ResponseEntity.ok(ApiResponse.success(mapToDto(newLog), "Webhook redrive initiated successfully"));
     }
 
     private WebhookDeliveryLogDto mapToDto(WebhookDeliveryLog log) {

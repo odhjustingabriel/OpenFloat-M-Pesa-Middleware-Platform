@@ -1,5 +1,6 @@
 package com.openfloat.mpesa.controller;
 
+import com.openfloat.mpesa.common.dto.ApiResponse;
 import com.openfloat.mpesa.dto.ReconciliationOverrideRequestDto;
 import com.openfloat.mpesa.service.ReconciliationService;
 import jakarta.validation.Valid;
@@ -26,12 +27,12 @@ public class ReconciliationController {
      */
     @PostMapping("/override")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    public ResponseEntity<Map<String, Object>> manualOverride(
+    public ResponseEntity<ApiResponse<Map<String, Object>>> manualOverride(
             @Valid @RequestBody ReconciliationOverrideRequestDto dto,
             Authentication authentication) {
 
         String managerUsername = authentication != null ? authentication.getName() : "MANAGER";
         Map<String, Object> result = reconciliationService.executeManualOverride(dto, managerUsername);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(ApiResponse.success(result, "Manual reconciliation override executed successfully"));
     }
 }

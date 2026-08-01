@@ -1,5 +1,6 @@
 package com.openfloat.mpesa.controller;
 
+import com.openfloat.mpesa.common.dto.ApiResponse;
 import com.openfloat.mpesa.common.exception.ResourceNotFoundException;
 import com.openfloat.mpesa.dto.AccountRefGenerateRequestDto;
 import com.openfloat.mpesa.dto.AccountRefResponseDto;
@@ -31,9 +32,9 @@ public class AccountReferenceController {
      */
     @PostMapping("/generate")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'OPERATOR')")
-    public ResponseEntity<AccountRefResponseDto> generateReference(@Valid @RequestBody AccountRefGenerateRequestDto dto) {
+    public ResponseEntity<ApiResponse<AccountRefResponseDto>> generateReference(@Valid @RequestBody AccountRefGenerateRequestDto dto) {
         AccountRefResponseDto response = referenceService.generateReference(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(response, "Account Reference generated successfully"));
     }
 
     /**
@@ -41,11 +42,11 @@ public class AccountReferenceController {
      */
     @GetMapping("/{reference}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'OPERATOR', 'FINANCE', 'VIEWER')")
-    public ResponseEntity<AccountRefResponseDto> getReferenceDetails(@PathVariable String reference) {
+    public ResponseEntity<ApiResponse<AccountRefResponseDto>> getReferenceDetails(@PathVariable String reference) {
         AccountReferenceMapping mapping = referenceService.findByAccountReference(reference)
                 .orElseThrow(() -> new ResourceNotFoundException("Account reference not found: " + reference));
 
-        return ResponseEntity.ok(AccountRefResponseDto.builder()
+        return ResponseEntity.ok(ApiResponse.success(AccountRefResponseDto.builder()
                 .id(mapping.getId())
                 .accountReference(mapping.getAccountReference())
                 .clientAppId(mapping.getClientApp().getId())
@@ -60,7 +61,7 @@ public class AccountReferenceController {
                 .paidAt(mapping.getPaidAt())
                 .transactionId(mapping.getTransaction() != null ? mapping.getTransaction().getId().toString() : null)
                 .createdAt(mapping.getCreatedAt())
-                .build());
+                .build()));
     }
 
     /**
@@ -68,7 +69,7 @@ public class AccountReferenceController {
      */
     @GetMapping("/client/{clientAppId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    public ResponseEntity<List<AccountRefResponseDto>> getClientReferences(@PathVariable UUID clientAppId) {
-        return ResponseEntity.ok(referenceService.getReferencesByClientAppId(clientAppId));
+    public ResponseEntity<ApiResponse<List<AccountRefResponseDto>>> getClientReferences(@PathVariable UUID clientAppId) {
+        return ResponseEntity.ok(ApiResponse.success(referenceService.getReferencesByClientAppId(clientAppId)));
     }
 }
