@@ -35,6 +35,7 @@ class CallbackServiceTest {
     @Mock private TransactionEventPublisher eventPublisher;
     @Mock private TransactionMapper transactionMapper;
     @Mock private CallbackMapper callbackMapper;
+    @Mock private WebhookDispatcherService webhookDispatcherService;
 
     private CallbackService service;
 
@@ -42,7 +43,8 @@ class CallbackServiceTest {
     void setUp() {
         service = new CallbackService(
                 transactionRepository, callbackRepository, eventPublisher,
-                transactionMapper, callbackMapper, new SimpleMeterRegistry()
+                transactionMapper, callbackMapper, new SimpleMeterRegistry(),
+                webhookDispatcherService
         );
 
         lenient().when(callbackMapper.toEntity(any(), any(), any(), any()))

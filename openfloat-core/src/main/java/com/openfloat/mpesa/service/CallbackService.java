@@ -31,10 +31,10 @@ public class CallbackService {
     private final TransactionRepository transactionRepository;
     private final CallbackRepository callbackRepository;
     private final TransactionEventPublisher eventPublisher;
-    private final WebhookDispatcherService webhookDispatcherService;
     private final TransactionMapper transactionMapper;
     private final CallbackMapper callbackMapper;
     private final MeterRegistry meterRegistry;
+    private final WebhookDispatcherService webhookDispatcherService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**

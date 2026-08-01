@@ -36,6 +36,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings({"null", "unchecked"})
 public class WebhookDispatcherService {
 
     private final AccountReferenceMappingRepository mappingRepository;
