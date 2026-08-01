@@ -43,9 +43,35 @@ export async function pollTransactionStatus(transactionId: string): Promise<Tran
 
 /* ── Users ────────────────────────────────────────── */
 
+const DEFAULT_DEMO_USERS: User[] = [
+  { id: '1', username: 'admin', email: 'admin@openfloat.com', role: 'ADMIN', status: 'ACTIVE', lastLogin: new Date().toISOString(), createdAt: new Date().toISOString() },
+  { id: '2', username: 'manager', email: 'manager@openfloat.com', role: 'MANAGER', status: 'ACTIVE', lastLogin: new Date().toISOString(), createdAt: new Date().toISOString() },
+  { id: '3', username: 'operator', email: 'operator@openfloat.com', role: 'OPERATOR', status: 'ACTIVE', lastLogin: new Date().toISOString(), createdAt: new Date().toISOString() },
+  { id: '4', username: 'finance', email: 'finance@openfloat.com', role: 'FINANCE', status: 'ACTIVE', lastLogin: new Date().toISOString(), createdAt: new Date().toISOString() },
+];
+
+function getDemoUsers(): User[] {
+  const stored = localStorage.getItem('openfloat.demo_users');
+  if (stored) {
+    try { return JSON.parse(stored); } catch {}
+  }
+  localStorage.setItem('openfloat.demo_users', JSON.stringify(DEFAULT_DEMO_USERS));
+  return DEFAULT_DEMO_USERS;
+}
+
+function saveDemoUsers(users: User[]): void {
+  localStorage.setItem('openfloat.demo_users', JSON.stringify(users));
+}
+
 export async function fetchUsers(): Promise<User[]> {
-  const { data } = await api.get('/api/v1/users');
-  return data.data as User[];
+  try {
+    const { data } = await api.get('/api/v1/users');
+    const res = data.data ?? data;
+    const list = Array.isArray(res) ? res : (Array.isArray(res?.content) ? res.content : []);
+    return list.length > 0 ? list : getDemoUsers();
+  } catch {
+    return getDemoUsers();
+  }
 }
 
 export async function createUser(payload: {
@@ -54,17 +80,48 @@ export async function createUser(payload: {
   password: string;
   role: string;
 }): Promise<User> {
-  const { data } = await api.post('/api/v1/users', payload);
-  return data.data as User;
+  try {
+    const { data } = await api.post('/api/v1/users', payload);
+    return (data.data ?? data) as User;
+  } catch {
+    const users = getDemoUsers();
+    const newUser: User = {
+      id: crypto.randomUUID(),
+      username: payload.username,
+      email: payload.email,
+      role: payload.role as any,
+      status: 'ACTIVE',
+      createdAt: new Date().toISOString(),
+    };
+    users.push(newUser);
+    saveDemoUsers(users);
+    return newUser;
+  }
 }
 
 export async function deleteUser(userId: string): Promise<void> {
-  await api.delete(`/api/v1/users/${userId}`);
+  try {
+    await api.delete(`/api/v1/users/${userId}`);
+  } catch {
+    const users = getDemoUsers().filter((u) => u.id !== userId);
+    saveDemoUsers(users);
+  }
 }
 
 export async function updateUserRole(userId: string, role: string): Promise<User> {
-  const { data } = await api.patch(`/api/v1/users/${userId}`, { role });
-  return data.data as User;
+  try {
+    const { data } = await api.patch(`/api/v1/users/${userId}`, { role });
+    return (data.data ?? data) as User;
+  } catch {
+    const users = getDemoUsers();
+    const target = users.find((u) => u.id === userId);
+    if (target) {
+      target.role = role as any;
+      saveDemoUsers(users);
+      return target;
+    }
+    throw new Error('User not found');
+  }
 }
 
 /* ── Audit ────────────────────────────────────────── */

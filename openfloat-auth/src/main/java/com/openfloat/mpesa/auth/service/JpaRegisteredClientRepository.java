@@ -42,7 +42,41 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
         log.debug("Finding registered client by client ID: {}", clientId);
         return apiClientRepository.findByClientId(clientId)
                 .map(this::toRegisteredClient)
-                .orElse(null);
+                .orElseGet(() -> {
+                    if ("openfloat-staff-portal".equalsIgnoreCase(clientId)) {
+                        log.info("Returning default PKCE RegisteredClient configuration for 'openfloat-staff-portal'");
+                        return createStaffPortalClient();
+                    }
+                    return null;
+                });
+    }
+
+    private RegisteredClient createStaffPortalClient() {
+        return RegisteredClient.withId("openfloat-staff-portal-id")
+                .clientId("openfloat-staff-portal")
+                .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .redirectUri("http://localhost:5173/oauth/callback")
+                .redirectUri("http://localhost:5173/oauth2/callback")
+                .redirectUri("http://localhost:8080/login/oauth2/code/gateway")
+                .redirectUri("http://localhost:3000/login/callback")
+                .scope("openid")
+                .scope("profile")
+                .scope("read")
+                .scope("write")
+                .clientSettings(ClientSettings.builder()
+                        .requireProofKey(true)
+                        .requireAuthorizationConsent(false)
+                        .build())
+                .tokenSettings(TokenSettings.builder()
+                        .accessTokenTimeToLive(Duration.ofHours(2))
+                        .refreshTokenTimeToLive(Duration.ofDays(7))
+                        .build())
+                .build();
     }
 
     private RegisteredClient toRegisteredClient(ApiClient client) {
@@ -54,17 +88,22 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
         return RegisteredClient.withId(client.getId().toString())
                 .clientId(client.getClientId())
                 .clientSecret(client.getClientSecret())
+                .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                // For staff-portal web clients, we might support password / authorization_code flow
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                .redirectUri("http://localhost:5173/oauth/callback")
+                .redirectUri("http://localhost:5173/oauth2/callback")
                 .redirectUri("http://localhost:8080/login/oauth2/code/gateway")
                 .redirectUri("http://localhost:3000/login/callback")
+                .scope("openid")
+                .scope("profile")
                 .scope("read")
                 .scope("write")
                 .clientSettings(ClientSettings.builder()
+                        .requireProofKey(false)
                         .requireAuthorizationConsent(false)
                         .build())
                 .tokenSettings(TokenSettings.builder()
