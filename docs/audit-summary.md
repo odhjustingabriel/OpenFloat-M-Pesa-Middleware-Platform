@@ -23,6 +23,8 @@ Phase 4 — ERP Connector & Reconciliation         █████████�
 Phase 5 — Testing & Observability                ████████████ 100%  ✅
 Phase 6 — API Gateway & Staff Portal             ████████████ 100%  ✅
 Phase 7 — Production Hardening & Go-Live         ████████████ 100%  ✅
+Phase 8 — Multi-Tenant Routing & Webhooks        ████████████ 100%  ✅
+Phase 9 — Financial Reports, Invoices & Payouts  ░░░░░░░░░░░░   0%  🔲 Planned
 ```
 
 ---
@@ -91,6 +93,19 @@ Phase 7 — Production Hardening & Go-Live         █████████�
 * **Daraja Token & Credential Rotation**: `@Scheduled` job (`DarajaCredentialRotationJob.java`) running every 6 hours to renew OAuth tokens and verify credential health.
 * **Production Configurations**: `application-prod.yml` profiles enforcing TLS 1.3, HikariCP prod sizing (50 max pool), production Safaricom URLs, and disabled Swagger-UI.
 * **Production Security Hardening**: Seed password rotator script (`scripts/rotate-seed-passwords.sh`), cert-manager TLS 1.3 Ingress (`k8s/gateway-ingress-tls.yaml`), Istio strict mTLS (`k8s/internal-mtls-policy.yaml`), Logstash SIEM pipeline (`k8s/logstash-config.yaml`), Prometheus alert rules (`k8s/prometheus-alerts.yaml`), pgBackRest backup CronJob (`k8s/postgres-backup-cronjob.yaml`), Redis AOF config (`k8s/redis-ha-config.yaml`), pod resource limits (`k8s/pod-resource-hardening.yaml`), k6 load test suite (`scripts/k6-load-test.js`), and operational incident runbooks (`docs/incident-runbooks.md`).
+
+### Phase 8 — Multi-Tenant Architecture & Dynamic Webhook Dispatching ✅
+* **Database Schema Migration (`V5__client_applications_schema.sql`)**: Tables for `client_applications`, `account_reference_mappings`, and `webhook_delivery_logs`.
+* **Client App & Reference Services**: `ClientAppService.java` & `AccountReferenceService.java` managing tenant system onboardings, callback URLs, API key generation, and dynamic reference routing (`ECOMM-8X92K4`).
+* **HMAC Webhook Dispatcher & Redrive**: `WebhookDispatcherService.java` dispatching real-time JSON webhooks to target client apps with HMAC-SHA256 signatures, and `WebhookRedriveController.java` enabling manual Manager webhook redrives.
+* **Manager Reconciliation Engine**: `ReconciliationService.java` handling manual payment reconciliation overrides and discrepancy resolution.
+* **Staff Portal Extension Views**: `ClientManagementPage.tsx`, `AccountReferencesPage.tsx`, `WebhookLogsPage.tsx`, and `ReconciliationPage.tsx`.
+
+### Phase 9 — Financial Reports, B2C RSA Encryption, Invoices & Bulk Payouts 🔲 (Planned)
+* **Financial PDF & Excel Report Exports**: `ReportService.java` & `ReportController.java` generating branded OpenPDF statements and Apache POI Excel workbooks.
+* **Safaricom B2C Initiator Password RSA Public Cert Encryption**: `B2CSecurityUtility.java` encrypting B2C initiator passwords using Safaricom's public certificate via `RSA/ECB/PKCS1Padding`.
+* **Invoicing Engine**: `InvoiceService.java` & `InvoicesPage.tsx` creating customer invoices and auto-matching C2B/STK payments to transition status (`UNPAID` $\rightarrow$ `PAID`).
+* **Bulk B2C Disbursements**: `BulkPayoutService.java` & `BulkPayoutsPage.tsx` parsing CSV beneficiary upload files for batch B2C disbursements.
 
 ---
 
