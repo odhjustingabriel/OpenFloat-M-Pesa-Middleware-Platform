@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ReportService — PDF and Excel Financial Report Generation")
+@SuppressWarnings("null")
 class ReportServiceTest {
 
     @Mock

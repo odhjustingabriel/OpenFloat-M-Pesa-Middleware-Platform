@@ -23,6 +23,7 @@ import java.time.Instant;
 @RequestMapping("/api/v1/reports")
 @RequiredArgsConstructor
 @Tag(name = "Financial Reports", description = "Export transaction statements as PDF documents or Excel workbooks")
+@SuppressWarnings("null")
 public class ReportController {
 
     private final ReportService reportService;
