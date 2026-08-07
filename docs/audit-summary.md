@@ -24,7 +24,7 @@ Phase 5 — Testing & Observability                █████████�
 Phase 6 — API Gateway & Staff Portal             ████████████ 100%  ✅
 Phase 7 — Production Hardening & Go-Live         ████████████ 100%  ✅
 Phase 8 — Multi-Tenant Routing & Webhooks        ████████████ 100%  ✅
-Phase 9 — Financial Reports, Invoices & Payouts  ░░░░░░░░░░░░   0%  🔲 Planned
+Phase 9 — Financial Reports, Invoices & Payouts  ███░░░░░░░░░  25%  🔲 In Progress
 ```
 
 ---
@@ -101,9 +101,9 @@ Phase 9 — Financial Reports, Invoices & Payouts  ░░░░░░░░░�
 * **Manager Reconciliation Engine**: `ReconciliationService.java` handling manual payment reconciliation overrides and discrepancy resolution.
 * **Staff Portal Extension Views**: `ClientManagementPage.tsx`, `AccountReferencesPage.tsx`, `WebhookLogsPage.tsx`, and `ReconciliationPage.tsx`.
 
-### Phase 9 — Financial Reports, B2C RSA Encryption, Invoices & Bulk Payouts 🔲 (Planned)
+### Phase 9 — Financial Reports, B2C RSA Encryption, Invoices & Bulk Payouts 🔲 (25% Complete)
+* **Safaricom B2C Initiator Password RSA Public Cert Encryption ✅**: `B2CSecurityUtility.java` encrypts B2C initiator passwords using Safaricom's public certificate via `RSA/ECB/PKCS1Padding`, integrated into `B2CService.java` and verified with `B2CSecurityUtilityTest.java`.
 * **Financial PDF & Excel Report Exports**: `ReportService.java` & `ReportController.java` generating branded OpenPDF statements and Apache POI Excel workbooks.
-* **Safaricom B2C Initiator Password RSA Public Cert Encryption**: `B2CSecurityUtility.java` encrypting B2C initiator passwords using Safaricom's public certificate via `RSA/ECB/PKCS1Padding`.
 * **Invoicing Engine**: `InvoiceService.java` & `InvoicesPage.tsx` creating customer invoices and auto-matching C2B/STK payments to transition status (`UNPAID` $\rightarrow$ `PAID`).
 * **Bulk B2C Disbursements**: `BulkPayoutService.java` & `BulkPayoutsPage.tsx` parsing CSV beneficiary upload files for batch B2C disbursements.
 

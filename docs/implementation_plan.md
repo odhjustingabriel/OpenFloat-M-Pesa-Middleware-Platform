@@ -326,11 +326,13 @@ Phase 9 incorporates enterprise finance report exports, automated B2C initiator 
 - **Staff Portal Integration (`openfloat-staff-portal`)**:
   - Add PDF/Excel export triggers on `TransactionsPage.tsx` and `ReconciliationPage.tsx`.
 
-#### 2. Safaricom B2C Initiator Password RSA Public Cert Encryption
+#### 2. Safaricom B2C Initiator Password RSA Public Cert Encryption ✅ (25% Phase 9 Complete)
 - **`B2CSecurityUtility.java` (`openfloat-core`)**:
-  - Load Safaricom's public certificate (`SandboxCertificate.cer` / production `.cer`) to encrypt B2C Initiator Passwords using `RSA/ECB/PKCS1Padding` before dispatching B2C requests to Daraja.
+  - Encrypts B2C Initiator Passwords using Safaricom's X.509 public certificate (`SandboxCertificate.cer` / production `.cer`) with `RSA/ECB/PKCS1Padding` before dispatching B2C requests to Daraja.
 - **`B2CService.java` Integration**:
-  - Auto-encrypt raw initiator password parameters transparently.
+  - Auto-encrypts raw initiator password parameters transparently before calling Daraja endpoints.
+- **`B2CSecurityUtilityTest.java`**:
+  - Full unit test suite verifying certificate parsing, RSA/PKCS1 cipher encryption, Base64 output formatting, and non-deterministic ciphertext generation.
 
 #### 3. Invoicing Engine & Payment Fulfillment
 - **`Invoice.java` Entity & `InvoiceRepository.java`**:
