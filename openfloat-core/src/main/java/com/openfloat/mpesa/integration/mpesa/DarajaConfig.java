@@ -26,6 +26,9 @@ public class DarajaConfig {
     @Value("${openfloat.mpesa.daraja.callback-base-url}")
     private String callbackBaseUrl;
 
+    @Value("${openfloat.mpesa.daraja.initiator-name:OpenFloatInitiator}")
+    private String initiatorName;
+
     // Standard endpoints paths
     public String getAuthUrl() {
         return baseUrl + "/oauth/v1/generate?grant_type=client_credentials";

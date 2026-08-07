@@ -9,6 +9,7 @@ import com.openfloat.mpesa.integration.mpesa.DarajaClient;
 import com.openfloat.mpesa.integration.mpesa.DarajaConfig;
 import com.openfloat.mpesa.integration.mpesa.dto.B2CRequest;
 import com.openfloat.mpesa.integration.mpesa.dto.B2CResponse;
+import com.openfloat.mpesa.util.B2CSecurityUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ public class B2CService {
     private final DarajaConfig darajaConfig;
     private final TransactionService transactionService;
     private final IdempotencyService idempotencyService;
+    private final B2CSecurityUtility b2cSecurityUtility;
 
     @Transactional
     public UUID initiateDisbursement(String msisdn, BigDecimal amount, String commandId, String remarks, String occasion) {
@@ -56,11 +58,14 @@ public class B2CService {
         transaction = transactionService.save(transaction);
         idempotencyService.saveIdempotencyKey(idempotencyKey);
 
-        // 3. Build B2C Request Parameters
+        // 3. Build B2C Request Parameters — SecurityCredential is RSA-encrypted via Safaricom's public cert
         String callbackBase = darajaConfig.getCallbackBaseUrl();
+        String securityCredential = b2cSecurityUtility.buildSecurityCredential();
+        log.debug("Built RSA-encrypted security credential for B2C transaction: {}", transaction.getId());
+
         B2CRequest b2cRequest = B2CRequest.builder()
-                .initiatorName("OpenFloatInitiator") // Sandbox default or configured value
-                .securityCredential("SandboxSecurityCredential") // Stub/Sandbox config
+                .initiatorName(darajaConfig.getInitiatorName())
+                .securityCredential(securityCredential)
                 .commandId(commandId != null ? commandId : "PromotionPayment")
                 .amount(amount.intValue())
                 .partyA(darajaConfig.getShortcode())

@@ -101,6 +101,13 @@ openfloat:
       passkey: ${MPESA_PASSKEY:sandbox_passkey}
       shortcode: ${MPESA_SHORTCODE:174379}
       callback-base-url: ${MPESA_CALLBACK_BASE_URL:https://your-domain.com}
+      initiator-name: ${MPESA_INITIATOR_NAME:OpenFloatInitiator}
+
+    # ── B2C Security Credential (Phase 9) ──────────────────────────────
+    b2c:
+      initiator-password: ${MPESA_B2C_INITIATOR_PASSWORD:Safaricom999!}
+      # Use the Sandbox cert for development; override with production cert path for go-live
+      certificate-path: ${MPESA_B2C_CERT_PATH:classpath:certs/SandboxCertificate.cer}
 
   rate-limit:
     requests-per-minute: 100
