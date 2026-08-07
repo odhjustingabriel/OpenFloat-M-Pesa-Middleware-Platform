@@ -15,6 +15,7 @@ Phase 5 — Testing & Observability                █████████�
 Phase 6 — API Gateway & Staff Portal             ████████████ 100%  ✅
 Phase 7 — Production Hardening & Go-Live         ████████████ 100%  ✅
 Phase 8 — Multi-Tenant Routing & Webhooks        ████████████ 100%  ✅
+Phase 9 — Financial Reports, Invoices & Payouts  ░░░░░░░░░░░░   0%  🔲 Planned
 ```
 
 ---
@@ -409,6 +410,21 @@ This phase addresses multi-tenant client registration, dynamic Account Reference
 
 - [x] **Staff Portal UI Extensions** — Client Management page, Account References generator view, Webhook Dispatch console, and Manager Reconciliation Dashboard
   - Files: [ClientManagementPage.tsx](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/pages/ClientManagementPage.tsx) · [AccountReferencesPage.tsx](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/pages/AccountReferencesPage.tsx) · [WebhookLogsPage.tsx](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/pages/WebhookLogsPage.tsx) · [ReconciliationPage.tsx](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/pages/ReconciliationPage.tsx)
+
+---
+
+## Phase 9 — Financial Reports, B2C RSA Encryption, Invoicing Engine & Bulk Payouts 🔲
+
+### Overview
+Phase 9 expands the middleware with enterprise reporting capabilities (PDF/Excel exports), B2C initiator password RSA certificate encryption, invoice lifecycle tracking, and CSV bulk payout disbursements benchmarked against `Collinc254/OPENFLOAT`.
+
+### Planned Checklist
+
+- [ ] **`ReportService.java` + `ReportController.java`** — PDF (`OpenPDF`) and Excel (`Apache POI`) statement generation endpoints (`GET /api/v1/reports/transactions/pdf`, `GET /api/v1/reports/transactions/excel`)
+- [ ] **`B2CSecurityUtility.java`** — Safaricom B2C initiator password RSA public key encryption (`SandboxCertificate.cer` / production `.cer`) using `RSA/ECB/PKCS1Padding`
+- [ ] **`Invoice.java` + `InvoiceService.java` + `InvoiceController.java`** — Customer invoicing engine linked to Account References with automatic payment status transition (`UNPAID` $\rightarrow$ `PAID`) upon C2B/STK callback ingestion
+- [ ] **`BulkPayoutService.java` + `BulkPayoutController.java`** — Bulk CSV beneficiary disbursement parser and async B2C queue dispatch
+- [ ] **Staff Portal UI Views** — Invoice Management view (`InvoicesPage.tsx`), Bulk Payout CSV Upload console (`BulkPayoutsPage.tsx`), and PDF/Excel Statement export buttons on `TransactionsPage.tsx`
 
 ---
 

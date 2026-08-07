@@ -312,6 +312,44 @@ Transform the platform from single-tenant integration into a **Multi-Tenant Paym
 
 ---
 
+## 🔲 Phase 9 — Financial Reports, B2C RSA Encryption, Invoicing Engine & Bulk Payouts
+
+### Overview & Objectives
+Benchmarked against `Collinc254/OPENFLOAT`, Phase 9 incorporates enterprise finance report exports, automated B2C initiator password RSA certificate encryption, customer invoicing with automatic payment fulfillment, and bulk CSV disbursement capabilities.
+
+### Planned Components & Scope
+
+#### 1. Financial Report Generation (PDF & Excel Workbooks)
+- **`ReportService.java` & `ReportController.java` (`openfloat-core`)**:
+  - `GET /api/v1/reports/transactions/pdf`: Generates branded PDF transaction statements using OpenPDF (`com.lowagie.text`).
+  - `GET /api/v1/reports/transactions/excel`: Generates styled Excel workbooks using Apache POI (`org.apache.poi.xssf.usermodel.XSSFWorkbook`).
+- **Staff Portal Integration (`openfloat-staff-portal`)**:
+  - Add PDF/Excel export triggers on `TransactionsPage.tsx` and `ReconciliationPage.tsx`.
+
+#### 2. Safaricom B2C Initiator Password RSA Public Cert Encryption
+- **`B2CSecurityUtility.java` (`openfloat-core`)**:
+  - Load Safaricom's public certificate (`SandboxCertificate.cer` / production `.cer`) to encrypt B2C Initiator Passwords using `RSA/ECB/PKCS1Padding` before dispatching B2C requests to Daraja.
+- **`B2CService.java` Integration**:
+  - Auto-encrypt raw initiator password parameters transparently.
+
+#### 3. Invoicing Engine & Payment Fulfillment
+- **`Invoice.java` Entity & `InvoiceRepository.java`**:
+  - Track customer invoices (`INVOICE_NUMBER`, `AMOUNT`, `DUE_DATE`, `STATUS: UNPAID/PARTIAL/PAID`).
+- **`InvoiceService.java` & `InvoiceController.java` (`POST /api/v1/invoices`, `GET /api/v1/invoices`)**:
+  - Create customer invoices linked to generated Account References.
+  - Automatically match C2B/STK payments to unpaid invoices and transition status to `PAID`.
+- **`InvoicesPage.tsx` (`openfloat-staff-portal`)**:
+  - Interface for staff to create, view, and monitor invoice payment status.
+
+#### 4. Bulk Payouts & Batch B2C Disbursement Engine
+- **`BulkPayoutService.java` & `BulkPayoutController.java` (`POST /api/v1/payments/b2c/bulk`)**:
+  - Accept CSV file uploads containing lists of beneficiary phone numbers, amounts, and remarks.
+  - Asynchronously queue batch B2C disbursements via RabbitMQ.
+- **`BulkPayoutsPage.tsx` (`openfloat-staff-portal`)**:
+  - UI for uploading CSV disbursement files and tracking batch completion metrics.
+
+---
+
 ## Open Questions
 
 > [!IMPORTANT]
