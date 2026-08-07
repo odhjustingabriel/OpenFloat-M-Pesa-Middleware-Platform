@@ -319,10 +319,12 @@ Phase 9 incorporates enterprise finance report exports, automated B2C initiator 
 
 ### Planned Components & Scope
 
-#### 1. Financial Report Generation (PDF & Excel Workbooks)
+#### 1. Financial Report Generation (PDF & Excel Workbooks) ✅ (50% Phase 9 Complete)
 - **`ReportService.java` & `ReportController.java` (`openfloat-core`)**:
   - `GET /api/v1/reports/transactions/pdf`: Generates branded PDF transaction statements using OpenPDF (`com.lowagie.text`).
-  - `GET /api/v1/reports/transactions/excel`: Generates styled Excel workbooks using Apache POI (`org.apache.poi.xssf.usermodel.XSSFWorkbook`).
+  - `GET /api/v1/reports/transactions/excel`: Generates styled Excel workbooks (`.xlsx`) using Apache POI (`org.apache.poi.xssf.usermodel.XSSFWorkbook`).
+- **`ReportServiceTest.java`**:
+  - Unit tests verifying `%PDF-` binary magic header output, `PK` ZIP binary magic header output for XLSX, and empty transaction list handling.
 - **Staff Portal Integration (`openfloat-staff-portal`)**:
   - Add PDF/Excel export triggers on `TransactionsPage.tsx` and `ReconciliationPage.tsx`.
 

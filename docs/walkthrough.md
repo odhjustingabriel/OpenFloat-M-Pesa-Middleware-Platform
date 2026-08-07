@@ -15,7 +15,7 @@ Phase 5 — Testing & Observability                █████████�
 Phase 6 — API Gateway & Staff Portal             ████████████ 100%  ✅
 Phase 7 — Production Hardening & Go-Live         ████████████ 100%  ✅
 Phase 8 — Multi-Tenant Routing & Webhooks        ████████████ 100%  ✅
-Phase 9 — Financial Reports, Invoices & Payouts  ███░░░░░░░░░  25%  🔲 In Progress
+Phase 9 — Financial Reports, Invoices & Payouts  ██████░░░░░░  50%  🔲 In Progress
 ```
 
 ---
@@ -420,7 +420,8 @@ Phase 9 expands the middleware with enterprise reporting capabilities (PDF/Excel
 
 ### Planned Checklist
 
-- [ ] **`ReportService.java` + `ReportController.java`** — PDF (`OpenPDF`) and Excel (`Apache POI`) statement generation endpoints (`GET /api/v1/reports/transactions/pdf`, `GET /api/v1/reports/transactions/excel`)
+- [x] **`ReportService.java` + `ReportController.java`** — PDF (`OpenPDF`) and Excel (`Apache POI`) statement generation endpoints (`GET /api/v1/reports/transactions/pdf`, `GET /api/v1/reports/transactions/excel`)
+  - Files: [ReportService.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/service/ReportService.java) · [ReportController.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/controller/ReportController.java) · [ReportServiceTest.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/test/java/com/openfloat/mpesa/service/ReportServiceTest.java)
 - [x] **`B2CSecurityUtility.java`** — Safaricom B2C initiator password RSA public key encryption (`SandboxCertificate.cer` / production `.cer`) using `RSA/ECB/PKCS1Padding`
   - Files: [B2CSecurityUtility.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/util/B2CSecurityUtility.java) · [B2CSecurityUtilityTest.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/test/java/com/openfloat/mpesa/util/B2CSecurityUtilityTest.java)
 - [ ] **`Invoice.java` + `InvoiceService.java` + `InvoiceController.java`** — Customer invoicing engine linked to Account References with automatic payment status transition (`UNPAID` $\rightarrow$ `PAID`) upon C2B/STK callback ingestion
