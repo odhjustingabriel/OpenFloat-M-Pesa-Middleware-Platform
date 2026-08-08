@@ -15,7 +15,7 @@ Phase 5 — Testing & Observability                █████████�
 Phase 6 — API Gateway & Staff Portal             ████████████ 100%  ✅
 Phase 7 — Production Hardening & Go-Live         ████████████ 100%  ✅
 Phase 8 — Multi-Tenant Routing & Webhooks        ████████████ 100%  ✅
-Phase 9 — Financial Reports, Invoices & Payouts  █████████░░░  75%  🔲 In Progress
+Phase 9 — Financial Reports, Invoices & Payouts  ████████████ 100%  ✅
 ```
 
 ---
@@ -413,12 +413,12 @@ This phase addresses multi-tenant client registration, dynamic Account Reference
 
 ---
 
-## Phase 9 — Financial Reports, B2C RSA Encryption, Invoicing Engine & Bulk Payouts 🔲
+## Phase 9 — Financial Reports, B2C RSA Encryption, Invoicing Engine & Bulk Payouts ✅
 
 ### Overview
 Phase 9 expands the middleware with enterprise reporting capabilities (PDF/Excel exports), B2C initiator password RSA certificate encryption, invoice lifecycle tracking, and CSV bulk payout disbursements benchmarked against `Collinc254/OPENFLOAT`.
 
-### Planned Checklist
+### Completed Checklist
 
 - [x] **`ReportService.java` + `ReportController.java`** — PDF (`OpenPDF`) and Excel (`Apache POI`) statement generation endpoints (`GET /api/v1/reports/transactions/pdf`, `GET /api/v1/reports/transactions/excel`)
   - Files: [ReportService.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/service/ReportService.java) · [ReportController.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/controller/ReportController.java) · [ReportServiceTest.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/test/java/com/openfloat/mpesa/service/ReportServiceTest.java)
@@ -426,7 +426,8 @@ Phase 9 expands the middleware with enterprise reporting capabilities (PDF/Excel
   - Files: [B2CSecurityUtility.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/util/B2CSecurityUtility.java) · [B2CSecurityUtilityTest.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/test/java/com/openfloat/mpesa/util/B2CSecurityUtilityTest.java)
 - [x] **`Invoice.java` + `InvoiceService.java` + `InvoiceController.java`** — Customer invoicing engine linked to Account References with automatic payment status transition (`UNPAID` $\rightarrow$ `PAID`) upon C2B/STK callback ingestion
   - Files: [Invoice.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/entity/Invoice.java) · [InvoiceRepository.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/repository/InvoiceRepository.java) · [InvoiceService.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/service/InvoiceService.java) · [InvoiceController.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/controller/InvoiceController.java) · [InvoiceServiceTest.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/test/java/com/openfloat/mpesa/service/InvoiceServiceTest.java)
-- [ ] **`BulkPayoutService.java` + `BulkPayoutController.java`** — Bulk CSV beneficiary disbursement parser and async B2C queue dispatch
+- [x] **`BulkPayoutService.java` + `BulkPayoutController.java`** — Bulk CSV beneficiary disbursement parser and batch B2C execution engine (`POST /api/v1/payments/b2c/bulk`, `POST /api/v1/payments/b2c/bulk/csv`)
+  - Files: [BulkPayoutItemDto.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/dto/BulkPayoutItemDto.java) · [BulkPayoutResultDto.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/dto/BulkPayoutResultDto.java) · [BulkPayoutService.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/service/BulkPayoutService.java) · [BulkPayoutController.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/controller/BulkPayoutController.java) · [BulkPayoutServiceTest.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/test/java/com/openfloat/mpesa/service/BulkPayoutServiceTest.java)
 - [ ] **Staff Portal UI Views** — Invoice Management view (`InvoicesPage.tsx`), Bulk Payout CSV Upload console (`BulkPayoutsPage.tsx`), and PDF/Excel Statement export buttons on `TransactionsPage.tsx`
 
 ---

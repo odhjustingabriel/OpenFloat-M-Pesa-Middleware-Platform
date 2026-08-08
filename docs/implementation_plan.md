@@ -347,10 +347,12 @@ Phase 9 incorporates enterprise finance report exports, automated B2C initiator 
 - **`InvoicesPage.tsx` (`openfloat-staff-portal`)**:
   - Interface for staff to create, view, and monitor invoice payment status.
 
-#### 4. Bulk Payouts & Batch B2C Disbursement Engine
-- **`BulkPayoutService.java` & `BulkPayoutController.java` (`POST /api/v1/payments/b2c/bulk`)**:
-  - Accept CSV file uploads containing lists of beneficiary phone numbers, amounts, and remarks.
-  - Asynchronously queue batch B2C disbursements via RabbitMQ.
+#### 4. Bulk Payouts & Batch B2C Disbursement Engine ✅ (100% Phase 9 Complete)
+- **`BulkPayoutService.java` & `BulkPayoutController.java` (`POST /api/v1/payments/b2c/bulk`, `POST /api/v1/payments/b2c/bulk/csv`)**:
+  - Accepts JSON payload lists or CSV file uploads (`multipart/form-data`) containing beneficiary phone numbers, amounts, command IDs, and remarks.
+  - Validates MSISDNs, enforces minimum disbursement limits (KES 10.00), and dispatches batch B2C disbursements via `B2CService`.
+- **`BulkPayoutServiceTest.java`**:
+  - Unit test suite verifying JSON batch processing, CSV stream parsing with headers, validation error handling, and batch metric aggregation.
 - **`BulkPayoutsPage.tsx` (`openfloat-staff-portal`)**:
   - UI for uploading CSV disbursement files and tracking batch completion metrics.
 
