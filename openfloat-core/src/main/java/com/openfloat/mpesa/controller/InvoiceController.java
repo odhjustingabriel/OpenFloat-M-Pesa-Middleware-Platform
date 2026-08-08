@@ -31,7 +31,6 @@ import java.util.UUID;
 @RequestMapping("/api/v1/invoices")
 @RequiredArgsConstructor
 @Tag(name = "Invoice Management", description = "Create, view, filter, and cancel customer invoices")
-@SuppressWarnings("null")
 public class InvoiceController {
 
     private final InvoiceService invoiceService;
