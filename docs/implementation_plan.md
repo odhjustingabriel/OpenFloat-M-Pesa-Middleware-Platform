@@ -336,12 +336,14 @@ Phase 9 incorporates enterprise finance report exports, automated B2C initiator 
 - **`B2CSecurityUtilityTest.java`**:
   - Full unit test suite verifying certificate parsing, RSA/PKCS1 cipher encryption, Base64 output formatting, and non-deterministic ciphertext generation.
 
-#### 3. Invoicing Engine & Payment Fulfillment
+#### 3. Invoicing Engine & Payment Fulfillment ✅ (75% Phase 9 Complete)
 - **`Invoice.java` Entity & `InvoiceRepository.java`**:
-  - Track customer invoices (`INVOICE_NUMBER`, `AMOUNT`, `DUE_DATE`, `STATUS: UNPAID/PARTIAL/PAID`).
-- **`InvoiceService.java` & `InvoiceController.java` (`POST /api/v1/invoices`, `GET /api/v1/invoices`)**:
+  - Model customer invoices (`INVOICE_NUMBER`, `AMOUNT`, `DUE_DATE`, `STATUS: UNPAID/PARTIAL/PAID/CANCELLED/OVERDUE`) backed by Flyway migration `V6__invoices_schema.sql`.
+- **`InvoiceService.java` & `InvoiceController.java` (`POST /api/v1/invoices`, `GET /api/v1/invoices`, `POST /api/v1/invoices/{id}/cancel`)**:
   - Create customer invoices linked to generated Account References.
-  - Automatically match C2B/STK payments to unpaid invoices and transition status to `PAID`.
+  - Automatically match incoming C2B/STK payments to unpaid invoices and transition status to `PARTIAL` or `PAID`.
+- **`InvoiceServiceTest.java`**:
+  - Unit test suite verifying invoice creation, status transitions, cancellation rules, and full/partial payment fulfillment matching.
 - **`InvoicesPage.tsx` (`openfloat-staff-portal`)**:
   - Interface for staff to create, view, and monitor invoice payment status.
 
