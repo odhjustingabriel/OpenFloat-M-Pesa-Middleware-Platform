@@ -106,7 +106,7 @@ function CreateInvoiceModal({ onClose, onCreated }: { onClose: () => void; onCre
       <div className="card" style={{ width: '100%', maxWidth: 680 }}>
         <div className="toolbar" style={{ marginBottom: '1.25rem' }}>
           <h3 style={{ margin: 0 }}>Create Invoice</h3>
-          <button className="btn btn-ghost btn-sm" onClick={onClose}>✕ Close</button>
+          <button className="btn btn-ghost btn-sm" onClick={onClose}>Close</button>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -211,7 +211,7 @@ function CreateInvoiceModal({ onClose, onCreated }: { onClose: () => void; onCre
                     <td>
                       {lineItems.length > 1 && (
                         <button type="button" className="btn btn-ghost btn-sm" onClick={() => removeLine(idx)}
-                          style={{ color: 'var(--color-danger)' }}>✕</button>
+                          style={{ color: 'var(--color-danger)' }}>Remove</button>
                       )}
                     </td>
                   </tr>
@@ -231,14 +231,14 @@ function CreateInvoiceModal({ onClose, onCreated }: { onClose: () => void; onCre
 
           {error && (
             <div style={{ color: 'var(--color-danger)', fontSize: '0.85rem', marginBottom: '0.75rem' }}>
-              ⚠ {error}
+              {error}
             </div>
           )}
 
           <div className="toolbar-actions">
             <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Creating…' : '✓ Create Invoice'}
+              {loading ? 'Creating…' : 'Create Invoice'}
             </button>
           </div>
         </form>

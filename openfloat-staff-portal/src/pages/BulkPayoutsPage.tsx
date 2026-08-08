@@ -224,7 +224,7 @@ export default function BulkPayoutsPage() {
             </p>
           </div>
           <button className="btn btn-ghost btn-sm" onClick={downloadSampleCsv}>
-            📄 Download Sample CSV
+            Download Sample CSV
           </button>
         </div>
 
@@ -236,7 +236,7 @@ export default function BulkPayoutsPage() {
               className={`btn btn-sm ${mode === m ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => { setMode(m); setResult(null); setSubmitError(''); }}
             >
-              {m === 'csv' ? '📤 CSV Upload' : '✏️ Manual Entry'}
+              {m === 'csv' ? 'CSV Upload' : 'Manual Entry'}
             </button>
           ))}
         </div>
@@ -261,7 +261,7 @@ export default function BulkPayoutsPage() {
             }}
             onClick={() => document.getElementById('csv-file-input')?.click()}
           >
-            <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📂</div>
+            <div style={{ fontSize: '2rem', fontWeight: 300, color: 'var(--color-text-muted)', marginBottom: '0.5rem', letterSpacing: '0.1em' }}>↑ CSV</div>
             <div style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.25rem' }}>
               {csvFile ? csvFile.name : 'Drag & drop CSV here, or click to browse'}
             </div>
@@ -319,7 +319,7 @@ export default function BulkPayoutsPage() {
               </div>
 
               {submitError && (
-                <div style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '0.75rem' }}>⚠ {submitError}</div>
+                <div style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '0.75rem' }}>{submitError}</div>
               )}
 
               <div style={{ marginTop: '1rem' }}>
@@ -328,7 +328,7 @@ export default function BulkPayoutsPage() {
                   disabled={isLoading || csvErrors.length > 0 || !csvFile}
                   onClick={() => csvFile && csvMutation.mutate(csvFile)}
                 >
-                  {isLoading ? '⏳ Sending…' : `🚀 Disburse to ${csvPreview.length} Recipients`}
+                  {isLoading ? 'Sending…' : `Disburse to ${csvPreview.length} Recipients`}
                 </button>
               </div>
             </div>
@@ -404,7 +404,7 @@ export default function BulkPayoutsPage() {
                         className="btn btn-ghost btn-sm"
                         style={{ color: '#ef4444' }}
                         onClick={() => removeManualRow(idx)}
-                      >✕</button>
+                      >Remove</button>
                     )}
                   </td>
                 </tr>
@@ -413,7 +413,7 @@ export default function BulkPayoutsPage() {
           </table>
 
           {submitError && (
-            <div style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '0.75rem' }}>⚠ {submitError}</div>
+            <div style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '0.75rem' }}>{submitError}</div>
           )}
 
           <div style={{ marginTop: '1rem' }}>
@@ -427,7 +427,7 @@ export default function BulkPayoutsPage() {
                 manualMutation.mutate(manualRows);
               }}
             >
-              {isLoading ? '⏳ Sending…' : `🚀 Disburse to ${manualRows.length} Recipient${manualRows.length !== 1 ? 's' : ''}`}
+              {isLoading ? 'Sending…' : `Disburse to ${manualRows.length} Recipient${manualRows.length !== 1 ? 's' : ''}`}
             </button>
           </div>
         </div>
