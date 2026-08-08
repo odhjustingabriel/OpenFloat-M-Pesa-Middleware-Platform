@@ -358,6 +358,24 @@ Phase 9 incorporates enterprise finance report exports, automated B2C initiator 
 
 ---
 
+## Phase 10 — Staff Portal UI Extensions & Production Containerization 🔲 (Planned)
+
+### Overview
+Phase 10 extends the enterprise frontend dashboard with dedicated UI management consoles for Phase 9 features (Customer Invoices, Bulk B2C CSV Upload Console, and PDF/Excel Statement Export Action Triggers) and delivers production containerization manifests for zero-downtime deployment.
+
+### Planned Components & Scope
+
+#### 1. Staff Portal UI Management Extensions (`openfloat-staff-portal`)
+- **`InvoicesPage.tsx`**: Interface for staff to view, filter, create, and cancel customer invoices with live balance tracking.
+- **`BulkPayoutsPage.tsx`**: CSV file dropzone console to upload beneficiary disbursement files and display batch execution metrics (`successfulCount`, `failedCount`, `totalAmount`).
+- **Statement Export Triggers (`TransactionsPage.tsx` & `ReconciliationPage.tsx`)**: Add "Export PDF Statement" and "Export Excel Workbook" download triggers wired to `/api/v1/reports/transactions/pdf` and `/api/v1/reports/transactions/excel`.
+- **Navigation Router Update (`App.tsx` & Sidebar)**: Add navigation items and protected routes for `/invoices` and `/bulk-payouts`.
+
+#### 2. Production Containerization & Cloud Deployment Manifests
+- **Multi-Stage Dockerfiles**: Optimized Dockerfiles for `openfloat-core`, `openfloat-auth`, `openfloat-gateway`, `openfloat-erp-connector`, and `openfloat-staff-portal`.
+- **`docker-compose.yml`**: Production-ready orchestrator for PostgreSQL 16, RabbitMQ 3.13, Redis 7, Spring Boot microservices, and Nginx staff portal frontend.
+- **Environment Configuration Templates**: Production `.env.example` file specifying database credentials, OAuth2 secrets, Daraja keys, and RSA certificate paths.
+
 ## Open Questions
 
 > [!IMPORTANT]

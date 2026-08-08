@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchTransactions } from '../api/queries';
+import { fetchTransactions, downloadTransactionsPdf, downloadTransactionsExcel } from '../api/queries';
 import type { Transaction } from '../types/domain';
 import TransactionDetailPage from './TransactionDetailPage';
 
@@ -100,6 +100,20 @@ export default function TransactionsPage() {
           <div className="toolbar-actions">
             <button className="btn btn-secondary btn-sm" onClick={exportCsv}>
               📥 Export CSV
+            </button>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => downloadTransactionsPdf()}
+              title="Download PDF statement from backend"
+            >
+              📄 Export PDF
+            </button>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => downloadTransactionsExcel()}
+              title="Download Excel statement from backend"
+            >
+              📊 Export Excel
             </button>
           </div>
         </div>

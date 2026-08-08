@@ -14,6 +14,8 @@ import ClientManagementPage from './pages/ClientManagementPage';
 import AccountReferencesPage from './pages/AccountReferencesPage';
 import WebhookLogsPage from './pages/WebhookLogsPage';
 import ReconciliationPage from './pages/ReconciliationPage';
+import InvoicesPage from './pages/InvoicesPage';
+import BulkPayoutsPage from './pages/BulkPayoutsPage';
 
 import './styles.css';
 
@@ -39,6 +41,8 @@ const NAV_ITEMS: NavItem[] = [
   { key: 'dashboard', label: 'Dashboard' },
   { key: 'payments', label: 'Payments' },
   { key: 'transactions', label: 'Transactions' },
+  { key: 'invoices', label: 'Invoices', allowedRoles: ['ADMIN', 'MANAGER', 'FINANCE'] },
+  { key: 'bulkpayouts', label: 'Bulk Payouts', allowedRoles: ['ADMIN', 'MANAGER', 'FINANCE'] },
   { key: 'clients', label: 'Client Apps', allowedRoles: ['ADMIN', 'MANAGER'] },
   { key: 'references', label: 'Account References', allowedRoles: ['ADMIN', 'MANAGER'] },
   { key: 'webhooks', label: 'Webhook Logs', allowedRoles: ['ADMIN', 'MANAGER'] },
@@ -117,6 +121,10 @@ function PageRouter({ page }: { page: string }) {
       return <PaymentInitiatePage />;
     case 'transactions':
       return <TransactionsPage />;
+    case 'invoices':
+      return <InvoicesPage />;
+    case 'bulkpayouts':
+      return <BulkPayoutsPage />;
     case 'clients':
       return <ClientManagementPage />;
     case 'references':

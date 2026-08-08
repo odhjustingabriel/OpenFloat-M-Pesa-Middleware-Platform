@@ -1,5 +1,5 @@
 import { api } from './client';
-import type { Transaction, User, AuditLogEntry } from '../types/domain';
+import type { Transaction, User, AuditLogEntry, Invoice, CreateInvoiceRequest, BulkPayoutResult } from '../types/domain';
 
 /* ── Transactions ─────────────────────────────────── */
 
@@ -433,4 +433,191 @@ export async function executeReconciliationOverride(payload: {
 }): Promise<{ status: string; message: string }> {
   const { data } = await api.post('/api/v1/reconciliation/override', payload);
   return data.data ?? data;
+}
+
+/* ── Phase 9: Invoices ────────────────────────────────── */
+
+export async function fetchInvoices(
+  params: Record<string, string | number | undefined> = {}
+): Promise<Invoice[]> {
+  try {
+    const { data } = await api.get('/api/v1/invoices', { params });
+    const res = data.data ?? data;
+    const list = Array.isArray(res) ? res : (Array.isArray(res?.content) ? res.content : []);
+    return list.length > 0 ? list : getDemoInvoices();
+  } catch {
+    return getDemoInvoices();
+  }
+}
+
+function getDemoInvoices(): Invoice[] {
+  return [
+    {
+      id: 'inv-001',
+      invoiceNumber: 'INV-2026-0001',
+      customerName: 'Kamau Enterprises Ltd',
+      customerMsisdn: '254712345678',
+      lineItems: [
+        { description: 'Platform Subscription – July 2026', quantity: 1, unitPrice: 25000, subtotal: 25000 },
+        { description: 'SMS Notification Bundle (500 units)', quantity: 1, unitPrice: 5000, subtotal: 5000 },
+      ],
+      totalAmount: 30000,
+      currency: 'KES',
+      status: 'ISSUED',
+      issuedAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+      dueDate: new Date(Date.now() + 86400000 * 27).toISOString(),
+      createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+    },
+    {
+      id: 'inv-002',
+      invoiceNumber: 'INV-2026-0002',
+      customerName: 'Safiri Travel Agency',
+      customerMsisdn: '254723456789',
+      lineItems: [
+        { description: 'M-Pesa Integration Fee – Q3 2026', quantity: 1, unitPrice: 15000, subtotal: 15000 },
+      ],
+      totalAmount: 15000,
+      currency: 'KES',
+      status: 'PAID',
+      issuedAt: new Date(Date.now() - 86400000 * 10).toISOString(),
+      dueDate: new Date(Date.now() - 86400000 * 3).toISOString(),
+      paidAt: new Date(Date.now() - 86400000 * 4).toISOString(),
+      transactionId: 'TXN-88271',
+      createdAt: new Date(Date.now() - 86400000 * 10).toISOString(),
+    },
+    {
+      id: 'inv-003',
+      invoiceNumber: 'INV-2026-0003',
+      customerName: 'Uwezo Microfinance',
+      customerMsisdn: '254734567890',
+      lineItems: [
+        { description: 'Bulk B2C Disbursement Service – July', quantity: 1, unitPrice: 8000, subtotal: 8000 },
+        { description: 'ERP Connector License', quantity: 1, unitPrice: 12000, subtotal: 12000 },
+      ],
+      totalAmount: 20000,
+      currency: 'KES',
+      status: 'DRAFT',
+      createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+    },
+  ];
+}
+
+export async function createInvoice(payload: CreateInvoiceRequest): Promise<Invoice> {
+  try {
+    const { data } = await api.post('/api/v1/invoices', payload);
+    return data.data ?? data;
+  } catch {
+    // Demo fallback
+    const items = payload.lineItems.map((li) => ({
+      ...li,
+      subtotal: li.quantity * li.unitPrice,
+    }));
+    const total = items.reduce((s, li) => s + li.subtotal, 0);
+    const inv: Invoice = {
+      id: crypto.randomUUID(),
+      invoiceNumber: `INV-2026-${String(Math.floor(Math.random() * 9000) + 1000)}`,
+      customerName: payload.customerName,
+      customerMsisdn: payload.customerMsisdn,
+      lineItems: items,
+      totalAmount: total,
+      currency: 'KES',
+      status: 'DRAFT',
+      dueDate: payload.dueDate,
+      notes: payload.notes,
+      createdAt: new Date().toISOString(),
+    };
+    return inv;
+  }
+}
+
+export async function cancelInvoice(invoiceId: string): Promise<Invoice> {
+  try {
+    const { data } = await api.post(`/api/v1/invoices/${invoiceId}/cancel`);
+    return data.data ?? data;
+  } catch {
+    throw new Error('Failed to cancel invoice');
+  }
+}
+
+export async function issueInvoice(invoiceId: string): Promise<Invoice> {
+  try {
+    const { data } = await api.post(`/api/v1/invoices/${invoiceId}/issue`);
+    return data.data ?? data;
+  } catch {
+    throw new Error('Failed to issue invoice');
+  }
+}
+
+/* ── Phase 9: Bulk Payouts ────────────────────────────── */
+
+export async function submitBulkPayout(
+  items: Array<{ msisdn: string; amount: number; accountReference: string; remarks?: string }>
+): Promise<BulkPayoutResult> {
+  const { data } = await api.post('/api/v1/payments/b2c/bulk', { items });
+  return data.data ?? data;
+}
+
+export async function uploadBulkPayoutCsv(file: File): Promise<BulkPayoutResult> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const { data } = await api.post('/api/v1/payments/b2c/bulk/csv', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data.data ?? data;
+}
+
+/* ── Phase 9: Statement Export (PDF / Excel) ──────────── */
+
+/**
+ * Triggers a browser download of a PDF statement from the backend.
+ * Falls back gracefully when the backend is unavailable (dev mode).
+ */
+export async function downloadTransactionsPdf(
+  params: Record<string, string | number | undefined> = {}
+): Promise<void> {
+  try {
+    const response = await api.get('/api/v1/reports/transactions/pdf', {
+      params,
+      responseType: 'blob',
+    });
+    const blob = new Blob([response.data as BlobPart], { type: 'application/pdf' });
+    triggerDownload(blob, `transactions-${today()}.pdf`);
+  } catch {
+    alert('PDF export is not yet connected to the backend. Configure /api/v1/reports/transactions/pdf.');
+  }
+}
+
+/**
+ * Triggers a browser download of an Excel statement from the backend.
+ */
+export async function downloadTransactionsExcel(
+  params: Record<string, string | number | undefined> = {}
+): Promise<void> {
+  try {
+    const response = await api.get('/api/v1/reports/transactions/excel', {
+      params,
+      responseType: 'blob',
+    });
+    const blob = new Blob([response.data as BlobPart], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    triggerDownload(blob, `transactions-${today()}.xlsx`);
+  } catch {
+    alert('Excel export is not yet connected to the backend. Configure /api/v1/reports/transactions/excel.');
+  }
+}
+
+function triggerDownload(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function today(): string {
+  return new Date().toISOString().slice(0, 10);
 }

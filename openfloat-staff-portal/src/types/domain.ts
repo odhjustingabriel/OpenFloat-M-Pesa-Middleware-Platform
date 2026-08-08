@@ -58,3 +58,67 @@ export interface AuditLogEntry {
   previousHash: string;
   createdAt: string;
 }
+
+/* ── Phase 9: Invoices ──────────────────────────────── */
+
+export type InvoiceStatus = 'DRAFT' | 'ISSUED' | 'PAID' | 'CANCELLED' | string;
+
+export interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  customerName: string;
+  customerMsisdn: string;
+  lineItems: InvoiceLineItem[];
+  totalAmount: number;
+  currency: string;
+  status: InvoiceStatus;
+  issuedAt?: string;
+  dueDate?: string;
+  paidAt?: string;
+  transactionId?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface InvoiceLineItem {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
+}
+
+export interface CreateInvoiceRequest {
+  customerName: string;
+  customerMsisdn: string;
+  lineItems: Omit<InvoiceLineItem, 'subtotal'>[];
+  dueDate?: string;
+  notes?: string;
+}
+
+/* ── Phase 9: Bulk Payouts ──────────────────────────── */
+
+export interface BulkPayoutItem {
+  msisdn: string;
+  amount: number;
+  accountReference: string;
+  remarks?: string;
+}
+
+export interface BulkPayoutResult {
+  totalCount: number;
+  successfulCount: number;
+  failedCount: number;
+  totalAmount: number;
+  results: BulkPayoutItemResult[];
+  processedAt: string;
+}
+
+export interface BulkPayoutItemResult {
+  msisdn: string;
+  amount: number;
+  accountReference: string;
+  success: boolean;
+  transactionId?: string;
+  errorMessage?: string;
+}

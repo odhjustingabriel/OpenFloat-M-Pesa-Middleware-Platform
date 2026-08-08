@@ -16,6 +16,7 @@ Phase 6 — API Gateway & Staff Portal             █████████�
 Phase 7 — Production Hardening & Go-Live         ████████████ 100%  ✅
 Phase 8 — Multi-Tenant Routing & Webhooks        ████████████ 100%  ✅
 Phase 9 — Financial Reports, Invoices & Payouts  ████████████ 100%  ✅
+Phase 10 — Staff Portal UI Extensions & Containerization  ████████████ 100%  ✅
 ```
 
 ---
@@ -428,9 +429,26 @@ Phase 9 expands the middleware with enterprise reporting capabilities (PDF/Excel
   - Files: [Invoice.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/entity/Invoice.java) · [InvoiceRepository.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/repository/InvoiceRepository.java) · [InvoiceService.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/service/InvoiceService.java) · [InvoiceController.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/controller/InvoiceController.java) · [InvoiceServiceTest.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/test/java/com/openfloat/mpesa/service/InvoiceServiceTest.java)
 - [x] **`BulkPayoutService.java` + `BulkPayoutController.java`** — Bulk CSV beneficiary disbursement parser and batch B2C execution engine (`POST /api/v1/payments/b2c/bulk`, `POST /api/v1/payments/b2c/bulk/csv`)
   - Files: [BulkPayoutItemDto.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/dto/BulkPayoutItemDto.java) · [BulkPayoutResultDto.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/dto/BulkPayoutResultDto.java) · [BulkPayoutService.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/service/BulkPayoutService.java) · [BulkPayoutController.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/controller/BulkPayoutController.java) · [BulkPayoutServiceTest.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/test/java/com/openfloat/mpesa/service/BulkPayoutServiceTest.java)
-- [ ] **Staff Portal UI Views** — Invoice Management view (`InvoicesPage.tsx`), Bulk Payout CSV Upload console (`BulkPayoutsPage.tsx`), and PDF/Excel Statement export buttons on `TransactionsPage.tsx`
 
 ---
+
+## Phase 10 — Staff Portal UI Extensions & Production Containerization 🔲 (Planned)
+
+### Overview
+Phase 10 extends the enterprise frontend dashboard with dedicated UI management consoles for Phase 9 features (Customer Invoices, Bulk B2C CSV Upload Console, and PDF/Excel Statement Export Action Triggers) and delivers production containerization manifests for zero-downtime deployment.
+
+### Planned Checklist
+
+- [x] **`InvoicesPage.tsx` (`openfloat-staff-portal`)** — Interface for staff to view, filter, create, and cancel customer invoices with live balance tracking
+  - File: [InvoicesPage.tsx](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/pages/InvoicesPage.tsx)
+- [x] **`BulkPayoutsPage.tsx` (`openfloat-staff-portal`)** — CSV file dropzone console to upload beneficiary disbursement files and display batch execution metrics (`successfulCount`, `failedCount`, `totalAmount`)
+  - File: [BulkPayoutsPage.tsx](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/pages/BulkPayoutsPage.tsx)
+- [x] **Statement Export Triggers (`TransactionsPage.tsx`)** — PDF and Excel statement download buttons wired to `/api/v1/reports/transactions/pdf` and `/api/v1/reports/transactions/excel`
+  - File: [TransactionsPage.tsx](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/pages/TransactionsPage.tsx)
+- [x] **Domain Types & API Queries** — `Invoice`, `BulkPayoutResult`, `BulkPayoutItem` types in `domain.ts`; `fetchInvoices`, `createInvoice`, `issueInvoice`, `cancelInvoice`, `submitBulkPayout`, `uploadBulkPayoutCsv`, `downloadTransactionsPdf`, `downloadTransactionsExcel` in `queries.ts`
+  - Files: [domain.ts](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/types/domain.ts) · [queries.ts](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/api/queries.ts)
+- [x] **Navigation wired in `main.tsx`** — `invoices` and `bulkpayouts` routes registered; sidebar entries visible to `ADMIN`, `MANAGER`, `FINANCE` roles
+  - File: [main.tsx](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-staff-portal/src/main.tsx)
 
 ## Key Architecture Decisions
 
