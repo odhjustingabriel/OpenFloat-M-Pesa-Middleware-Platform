@@ -153,7 +153,7 @@ export default function ClientManagementPage() {
 
       {/* ─── Registration Modal ─── */}
       {showModal && (
-        <div className="modal-overlay">
+        <div className="modal-overlay" style={{ marginTop: '2rem' }}>
           <div className="card modal-card" style={{ maxWidth: 540 }}>
             <div className="toolbar" style={{ display: 'flex', justifyContent: 'space-between' }}>
               <h4>Register Client System</h4>

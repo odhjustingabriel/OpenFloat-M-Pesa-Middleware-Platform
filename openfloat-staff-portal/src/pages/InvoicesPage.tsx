@@ -103,7 +103,7 @@ function CreateInvoiceModal({ onClose, onCreated }: { onClose: () => void; onCre
       }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="card" style={{ width: '100%', maxWidth: 680 }}>
+      <div className="card" style={{ width: '100%', maxWidth: 680, background: 'var(--color-surface-0)', borderColor: 'var(--color-border-hover)' }}>
         <div className="toolbar" style={{ marginBottom: '1.25rem' }}>
           <h3 style={{ margin: 0 }}>Create Invoice</h3>
           <button className="btn btn-ghost btn-sm" onClick={onClose}>Close</button>
