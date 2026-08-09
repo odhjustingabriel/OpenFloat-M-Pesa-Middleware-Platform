@@ -112,8 +112,91 @@ Hardcoding production database passwords or M-Pesa Daraja consumer keys in YAML 
 
 ---
 
+---
+
+## 7. Multi-Tenant Account Reference Routing & Signed Webhooks (Phase 8)
+
+### A. Dynamic Account Reference Resolution Engine
+In a multi-tenant payment middleware, multiple client applications (e.g. School Portals, E-Commerce Stores) share a single registered M-Pesa Paybill shortcode.
+
+```
+Customer Payment (Paybill: 174379, AccountRef: "SCH-4Y71P9")
+                   │
+                   ▼
+    ┌─────────────────────────────┐
+    │  OpenFloat Callback Engine  │
+    └──────────────┬──────────────┘
+                   │ Extract Prefix "SCH"
+                   ▼
+    ┌─────────────────────────────┐
+    │  Client App DB Registry     │ ──► Maps "SCH" -> Client App ID "1" (School Portal)
+    └──────────────┬──────────────┘
+                   │
+                   ▼
+    ┌─────────────────────────────┐
+    │  HMAC-SHA256 Signed Webhook │ ──► POST https://school.example.com/api/payment-webhook
+    └─────────────────────────────┘
+```
+
+* **The Challenge:** Routing incoming C2B payments to the correct destination system without requiring separate Paybills for every client app.
+* **The Solution:** Implemented prefix-based account reference resolution in `AccountReferenceService.java`. External systems call `POST /api/v1/references/generate` to reserve an account reference (e.g., `SCH-4Y71P9`). When Safaricom posts a C2B callback, `WebhookDispatcherService.java` extracts the prefix (`SCH`), resolves the target `ClientApp`, updates the reference status to `PAID`, and dispatches a signed webhook.
+
+### B. HMAC-SHA256 Webhook Security & Replay Prevention
+Sending unauthenticated webhooks over the public internet exposes client systems to spoofed payment notifications.
+* **Key Learning:** Built an HMAC-SHA256 signature scheme in `WebhookDispatcherService.java`:
+  $$\text{Signature} = \text{HMAC-SHA256}\Big(\text{WebhookSecret}, \, \text{Timestamp} \,||\, "." \,||\, \text{RawJsonPayload}\Big)$$
+* **Headers Included:** `X-OpenFloat-Signature: sha256=<hex_hash>` and `X-OpenFloat-Timestamp: <unix_epoch_ms>`.
+* **Replay Protection:** Target client applications verify that `Timestamp` is within a 5-minute threshold to reject replayed webhook captures.
+
+---
+
+## 8. Financial Document Generation & Memory Optimization (Phase 9)
+
+### A. Non-Blocking PDF Statement Generation with OpenPDF
+Generating audit-compliant financial PDF statements for transaction histories requires strict layout precision without draining JVM heap space under high concurrency.
+* **Key Learning:** Implemented `ReportService.java` using OpenPDF (`com.github.librepdf:openpdf`). Used ByteArrayOutputStream streaming, explicit cell padding, alternating row colors, and header repetition (`table.setHeaderRows(1)`) to cleanly format statement tables up to 10,000 transactions without memory exhaustion.
+
+### B. Memory-Efficient Excel Export via Apache POI SXSSF
+Standard DOM-based Excel libraries (such as Apache POI `XSSFWorkbook`) load the entire document tree in memory, causing `OutOfMemoryError` crashes during large exports.
+* **Key Learning:** Implemented streaming Excel generation via Apache POI `SXSSFWorkbook` (Streaming Extension for XSSF). `SXSSFWorkbook` maintains a configurable row window (100 rows) in memory and flushes older rows to temporary disk files, allowing multi-gigabyte transaction history exports with a stable 64MB memory footprint.
+
+---
+
+## 9. Safaricom B2C Initiator Password RSA Public Cert Encryption (Phase 9)
+
+### A. PKCS#1 v1.5 RSA Encryption Engine
+Safaricom's B2C (Business to Customer) disbursement API requires the `SecurityCredential` parameter to be an RSA-encrypted Base64 string containing the B2C Initiator Password.
+
+```
+Initiator Password ──► [ RSA 2048-bit Public Cert (PKCS1v1.5) ] ──► [ Base64 Encode ] ──► SecurityCredential
+```
+
+* **Implementation:** Built `B2CSecurityUtility.java` loading Safaricom's X.509 public certificate (`SandboxCertificate.cer` / `ProductionCertificate.cer`).
+* **Cipher Transformation:** Uses `Cipher.getInstance("RSA/ECB/PKCS1Padding")` to encrypt the plain initiator password bytes before encoding to Base64.
+* **Key Takeaway:** Integrated certificate caching using `CertificateFactory.getInstance("X.509")` to avoid re-parsing the certificate on every B2C disbursement request.
+
+---
+
+## 10. Customer Invoicing Engine & Automated Fulfillment (Phase 9)
+
+### A. Invoice State Machine & Automatic Payment Matching
+Implemented customer billing management in `InvoiceService.java` with lifecycle states: `DRAFT`, `ISSUED`, `PAID`, `CANCELLED`.
+* **Automated Fulfillment:** When a C2B or STK Push payment callback arrives, the middleware checks if the payment's `accountReference` or `msisdn` matches an outstanding `ISSUED` invoice. Upon a match, the invoice automatically transitions to `PAID`, records `paidAt` and `transactionId`, and records an audit log entry.
+
+---
+
+## 11. Bulk B2C Beneficiary Disbursements & CSV Stream Parsing (Phase 9/10)
+
+### A. Bulk Beneficiary CSV Parser & Partial Failure Resilience
+Distributing payouts to hundreds of mobile wallet recipients in a single batch (e.g. employee payroll or vendor disbursements) requires CSV stream parsing and resilient error isolation.
+* **Key Learning:** Built `BulkPayoutService.java` and `BulkPayoutsPage.tsx`. Supports uploading CSV files (`msisdn, amount, accountReference, remarks`).
+* **Partial Failure Handling:** If 3 out of 100 payments in a batch fail due to invalid MSISDNs or insufficient balance, the system does NOT roll back the entire batch. Instead, it completes the valid 97 payments, records individual `BulkPayoutItemResult` records, and returns a aggregate batch metrics object (`totalCount`, `successfulCount`, `failedCount`, `totalAmount`).
+
+---
+
 ## Conclusion
 
-Building OpenFloat synthesized advanced concepts across **backend microservices, security engineering, cryptography, message queues, reactive gateways, frontend SPA development, and cloud-native Kubernetes orchestration**. 
+Building OpenFloat synthesized advanced concepts across **backend microservices, security engineering, cryptography, message queues, reactive gateways, frontend SPA development, financial document generation, multi-tenant routing, and cloud-native Kubernetes orchestration**. 
 
 The result is a production-ready, resilient, and enterprise-hardened middleware platform capable of securely scaling M-Pesa payment operations.
+

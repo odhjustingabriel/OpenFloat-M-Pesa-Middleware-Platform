@@ -128,3 +128,48 @@ Every sensitive action (payment initiation, callback execution, user status modi
 ### Log Redaction & SIEM Hygiene
 * **`Logstash Pipeline` ([logstash-config.yaml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/k8s/logstash-config.yaml)):** Auto-detects and redacts sensitive M-Pesa payload fields (`InitiatorPassword`, `SecurityCredential`, `passkey`) before forwarding logs to Elasticsearch/Splunk.
 * **Pod Security Context ([pod-resource-hardening.yaml](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/k8s/pod-resource-hardening.yaml)):** Containers run as non-root (`runAsNonRoot: true`, `runAsUser: 10001`), with read-only root filesystems (`readOnlyRootFilesystem: true`) and privilege escalation disabled (`allowPrivilegeEscalation: false`).
+
+---
+
+## 8. Safaricom B2C SecurityCredential RSA-2048 Public Cert Encryption
+
+To comply with Safaricom's B2C security specification, the Initiator Password must be encrypted using Safaricom's X.509 Public Certificate before transmission over the network.
+
+* **Implementation File:** [B2CSecurityUtility.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/util/B2CSecurityUtility.java)
+* **Cipher Standard:** `RSA/ECB/PKCS1Padding` (2048-bit RSA key length).
+* **Certificate Loading:** Certificate loaded from classpath (`certs/SandboxCertificate.cer` or `certs/ProductionCertificate.cer`) via `CertificateFactory.getInstance("X.509")`.
+* **Output Format:** Encrypted output is Base64-encoded and passed as the `SecurityCredential` JSON payload property.
+
+---
+
+## 9. Multi-Tenant HMAC-SHA256 Webhook Payload Signing & Replay Protection
+
+When delivering real-time payment webhooks to registered client applications, payloads are cryptographically signed to prevent forgery and tampering.
+
+* **Implementation File:** [WebhookDispatcherService.java](file:///d:/HOC/OpenFloat-M-Pesa-Middleware-Platform/openfloat-core/src/main/java/com/openfloat/mpesa/service/WebhookDispatcherService.java)
+* **Signing Algorithm:** `HMAC-SHA256` computed using the client application's unique `webhookSecret`.
+* **Signature Header:** `X-OpenFloat-Signature: sha256=<hex_hash>`
+* **Timestamp Header:** `X-OpenFloat-Timestamp: <unix_epoch_ms>`
+* **Replay Prevention:** Target systems verify that the `X-OpenFloat-Timestamp` falls within a 5-minute validity window ($|T_{\text{now}} - T_{\text{header}}| \le 300\text{s}$) to reject intercepted and replayed webhook transmissions.
+
+---
+
+## 10. Staff Portal Role-Based Access Control (RBAC) & Scope Matrix
+
+The operational console enforces strict role-based route and API endpoint authorization across five system roles:
+
+| Staff Portal UI Route / Feature | Minimum Role Required | Permitted System Roles | Allowed Actions |
+|---|---|---|---|
+| **Dashboard Console** (`/dashboard`) | `VIEWER` | `VIEWER`, `OPERATOR`, `STAFF`, `FINANCE`, `MANAGER`, `ADMIN` | View payment KPIs, volume charts, success rates |
+| **Payment Initiation** (`/payments`) | `OPERATOR` | `OPERATOR`, `STAFF`, `FINANCE`, `MANAGER`, `ADMIN` | Initiate STK Push & B2C Disbursements |
+| **Transactions History** (`/transactions`) | `VIEWER` | `VIEWER`, `OPERATOR`, `STAFF`, `FINANCE`, `MANAGER`, `ADMIN` | View transaction logs, PDF/Excel/CSV exports |
+| **Invoices Management** (`/invoices`) | `FINANCE` | `FINANCE`, `MANAGER`, `ADMIN` | View, create, issue, and cancel customer invoices |
+| **Bulk Payouts Console** (`/bulkpayouts`) | `FINANCE` | `FINANCE`, `MANAGER`, `ADMIN` | Upload beneficiary CSVs & execute batch payouts |
+| **Client Applications** (`/clients`) | `MANAGER` | `MANAGER`, `ADMIN` | Register client systems, view API keys, change callback URLs |
+| **Account References** (`/references`) | `MANAGER` | `MANAGER`, `ADMIN` | Generate dynamic account references & route rules |
+| **Webhook Delivery Logs** (`/webhooks`) | `MANAGER` | `MANAGER`, `ADMIN` | Inspect webhook logs & execute manual redrives |
+| **Reconciliation Dashboard** (`/reconciliation`) | `FINANCE` | `FINANCE`, `MANAGER`, `ADMIN` | View 3-way matching & trigger manual overrides |
+| **Cryptographic Audit Log** (`/audit`) | `ADMIN` | `ADMIN` | Inspect SHA-256 audit chain & verify chain integrity |
+| **User Onboarding & Management** (`/users`) | `ADMIN` | `ADMIN` | Create users, assign roles, disable user accounts |
+| **Paybill System Settings** (`/settings`) | `ADMIN` | `ADMIN` | Update shortcodes, passkeys, and API client keys |
+
