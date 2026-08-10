@@ -318,14 +318,14 @@ export default function InvoicesPage() {
       {/* ─── Summary Strip ─── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
         {[
-          { label: 'Outstanding (Issued)', value: `KES ${totalIssued.toLocaleString()}`, accent: '#f59e0b' },
-          { label: 'Collected (Paid)', value: `KES ${totalPaid.toLocaleString()}`, accent: '#10b981' },
-          { label: 'Drafts Pending', value: draftCount.toString(), accent: '#6b7280' },
-        ].map(({ label, value, accent }) => (
+        { label: 'Outstanding (Issued)', value: `KES ${totalIssued.toLocaleString()}` },
+          { label: 'Collected (Paid)', value: `KES ${totalPaid.toLocaleString()}` },
+          { label: 'Drafts Pending', value: draftCount.toString() },
+        ].map(({ label, value }) => (
           <div
             key={label}
             className="card"
-            style={{ borderLeft: `4px solid ${accent}`, padding: '1rem 1.25rem' }}
+            style={{ padding: '1rem 1.25rem' }}
           >
             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
             <div style={{ fontSize: '1.5rem', fontWeight: 700, marginTop: '0.25rem' }}>{value}</div>
