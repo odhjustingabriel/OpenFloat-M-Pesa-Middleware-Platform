@@ -6,34 +6,34 @@
    Design Tokens
    ────────────────────────────────────────────────── */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
 
-  /* Brand palette */
+  /* Brand palette — unchanged */
   --color-brand-500: #00A650;
   --color-brand-400: #2ebd6a;
-  --color-brand-300: #7ee2ac;
+  --color-brand-300: #009144;
   --color-brand-200: #b6f0cf;
   --color-brand-700: #006934;
   --color-brand-900: #073d27;
 
-  /* Neutrals */
-  --color-surface-0: #020403;
-  --color-surface-50: #06110d;
-  --color-surface-100: #0e1f18;
-  --color-surface-200: rgba(255, 255, 255, 0.06);
-  --color-surface-card: linear-gradient(145deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04));
-  --color-border: rgba(255, 255, 255, 0.10);
-  --color-border-hover: rgba(255, 255, 255, 0.18);
-  --color-text-primary: #eefbf4;
-  --color-text-secondary: #8fa89a;
-  --color-text-muted: #5c7a6b;
+  /* Light-mode neutrals */
+  --color-surface-0: #ffffff;
+  --color-surface-50: #f4f6f5;
+  --color-surface-100: #edf0ee;
+  --color-surface-200: #e2e8e4;
+  --color-surface-card: #ffffff;
+  --color-border: rgba(0, 0, 0, 0.10);
+  --color-border-hover: rgba(0, 0, 0, 0.20);
+  --color-text-primary: #0d1f16;
+  --color-text-secondary: #3d5a4a;
+  --color-text-muted: #6b8a78;
 
   /* Status */
   --color-success: #00A650;
-  --color-warning: #f0ad4e;
-  --color-error: #ef4444;
-  --color-info: #3b82f6;
+  --color-warning: #d97706;
+  --color-error: #dc2626;
+  --color-info: #2563eb;
 
   /* Sizing */
   --sidebar-width: 280px;
@@ -42,9 +42,9 @@
   --radius-lg: 24px;
   --radius-pill: 999px;
 
-  /* Shadows */
-  --shadow-card: 0 4px 30px rgba(0, 0, 0, 0.20), 0 1px 3px rgba(0, 0, 0, 0.10);
-  --shadow-elevated: 0 24px 80px rgba(0, 0, 0, 0.35);
+  /* Shadows — lighter for light theme */
+  --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-elevated: 0 8px 40px rgba(0, 0, 0, 0.14);
 
   /* Transitions */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -62,7 +62,6 @@ body {
   margin: 0;
   font-family: var(--font-sans);
   background: var(--color-surface-50);
-  background-image: radial-gradient(circle at top right, var(--color-brand-900), var(--color-surface-50) 50%, var(--color-surface-0));
   color: var(--color-text-primary);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
@@ -219,6 +218,7 @@ body {
 
 .card:hover {
   border-color: var(--color-border-hover);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10), 0 6px 24px rgba(0, 0, 0, 0.08);
 }
 
 /* ─── Stat Card ─── */
@@ -295,7 +295,7 @@ thead th {
 
 tbody td {
   padding: 0.85rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   font-size: 0.9rem;
 }
 
@@ -320,18 +320,18 @@ tbody tr:hover {
 }
 
 .pill-success {
-  background: rgba(0, 166, 80, 0.15);
-  color: var(--color-brand-300);
+  background: rgba(0, 166, 80, 0.12);
+  color: #006934;
 }
 
 .pill-pending {
-  background: rgba(240, 173, 78, 0.15);
-  color: var(--color-warning);
+  background: rgba(217, 119, 6, 0.12);
+  color: #92400e;
 }
 
 .pill-failed {
-  background: rgba(239, 68, 68, 0.12);
-  color: #fca5a5;
+  background: rgba(220, 38, 38, 0.10);
+  color: #991b1b;
 }
 
 /* ──────────────────────────────────────────────────
@@ -374,13 +374,13 @@ tbody tr:hover {
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--color-surface-100);
   color: var(--color-text-primary);
   border: 1px solid var(--color-border);
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--color-surface-200);
   border-color: var(--color-border-hover);
 }
 
@@ -390,7 +390,7 @@ tbody tr:hover {
 }
 
 .btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--color-surface-100);
   color: var(--color-text-primary);
 }
 
@@ -418,7 +418,7 @@ tbody tr:hover {
 }
 
 .form-input {
-  background: rgba(255, 255, 255, 0.06);
+  background: #ffffff;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   color: var(--color-text-primary);
@@ -440,13 +440,11 @@ tbody tr:hover {
 
 /* ── Select / Dropdown ───────────────────────────────────────────── */
 select.form-input {
-  /* Solid background — prevents white bleed-through when option list opens */
-  background-color: var(--color-surface-100);
-  /* Remove OS-native chrome so our styling applies */
+  background-color: #ffffff;
   appearance: none;
   -webkit-appearance: none;
-  /* Custom chevron arrow */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238fa89a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  /* Custom chevron arrow — dark for light backgrounds */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%233d5a4a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.875rem center;
   padding-right: 2.5rem;
@@ -454,13 +452,13 @@ select.form-input {
 }
 
 select.form-input option {
-  background-color: var(--color-surface-100);
+  background-color: #ffffff;
   color: var(--color-text-primary);
 }
 
 select.form-input option:checked {
-  background-color: var(--color-brand-900);
-  color: var(--color-brand-300);
+  background-color: rgba(0, 166, 80, 0.10);
+  color: var(--color-brand-700);
 }
 
 .form-error {
@@ -584,8 +582,8 @@ select.form-input option:checked {
   display: inline-block;
   width: 1.25rem;
   height: 1.25rem;
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  border-top-color: var(--color-brand-400);
+  border: 2px solid rgba(0, 0, 0, 0.10);
+  border-top-color: var(--color-brand-500);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -633,7 +631,7 @@ select.form-input option:checked {
   padding: 1.25rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--color-surface-100);
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.82rem;
   line-height: 1.7;
@@ -644,11 +642,13 @@ select.form-input option:checked {
 }
 
 .result-block.success {
-  border-color: rgba(0, 166, 80, 0.25);
+  border-color: rgba(0, 166, 80, 0.30);
+  background: rgba(0, 166, 80, 0.04);
 }
 
 .result-block.error {
-  border-color: rgba(239, 68, 68, 0.25);
+  border-color: rgba(220, 38, 38, 0.30);
+  background: rgba(220, 38, 38, 0.04);
 }
 
 /* ──────────────────────────────────────────────────

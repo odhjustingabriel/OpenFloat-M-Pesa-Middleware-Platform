@@ -210,7 +210,7 @@ export default function SettingsPage() {
               marginTop: '1rem',
               marginBottom: '1rem',
               border: '1px solid var(--color-brand-400)',
-              background: 'rgba(0,0,0,0.4)',
+              background: 'var(--color-surface-0)',
             }}
           >
             <div className="toolbar">

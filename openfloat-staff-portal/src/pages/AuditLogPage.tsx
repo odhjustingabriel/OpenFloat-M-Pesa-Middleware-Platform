@@ -144,7 +144,7 @@ export default function AuditLogPage() {
                         <td colSpan={6} style={{ padding: '0 1rem 1rem' }}>
                           <div
                             style={{
-                              background: 'rgba(0, 0, 0, 0.25)',
+                              background: 'var(--color-surface-100)',
                               border: '1px solid var(--color-border)',
                               borderRadius: 'var(--radius-md)',
                               padding: '1rem',
