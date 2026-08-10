@@ -29,6 +29,104 @@ const queryClient = new QueryClient({
 });
 
 /* ──────────────────────────────────────────────────
+   OAuth Callback Handler
+   Exchanges the authorization code for a JWT token.
+   ────────────────────────────────────────────────── */
+function OAuthCallbackPage() {
+  const [status, setStatus] = React.useState<'loading' | 'error'>('loading');
+  const [errorMsg, setErrorMsg] = React.useState('');
+
+  React.useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const code = params.get('code');
+    const state = params.get('state');
+    const error = params.get('error');
+    const errorDesc = params.get('error_description');
+
+    if (error) {
+      setErrorMsg(`Auth server error: ${errorDesc ?? error}`);
+      setStatus('error');
+      return;
+    }
+
+    const savedState = sessionStorage.getItem('oauth_state');
+    const verifier = sessionStorage.getItem('pkce_verifier');
+
+    if (!code || !state || state !== savedState || !verifier) {
+      setErrorMsg('Invalid or mismatched OAuth state. Please try logging in again.');
+      setStatus('error');
+      return;
+    }
+
+    sessionStorage.removeItem('oauth_state');
+    sessionStorage.removeItem('pkce_verifier');
+
+    const base = import.meta.env.VITE_AUTH_BASE_URL || 'http://localhost:8081';
+    const clientId = import.meta.env.VITE_OAUTH_CLIENT_ID || 'openfloat-staff-portal';
+    const redirectUri = `${location.origin}/oauth/callback`;
+
+    const body = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: redirectUri,
+      client_id: clientId,
+      code_verifier: verifier,
+    });
+
+    fetch(`${base}/oauth2/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString(),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`Token exchange failed (${res.status}): ${text}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        const token = data.access_token;
+        if (!token) throw new Error('No access_token in response');
+        localStorage.setItem('openfloat.access_token', token);
+        // Decode role from JWT claims if present
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          const role = payload.role ?? payload.roles?.[0] ?? 'STAFF';
+          localStorage.setItem('openfloat.role', role);
+        } catch {
+          localStorage.setItem('openfloat.role', 'STAFF');
+        }
+        location.replace('/');
+      })
+      .catch((err: Error) => {
+        setErrorMsg(err.message);
+        setStatus('error');
+      });
+  }, []);
+
+  if (status === 'loading') {
+    return (
+      <div className="login-page">
+        <div className="card login-card">
+          <div className="loading-state"><span className="spinner" /> Completing sign-in…</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="login-page">
+      <div className="card login-card">
+        <h1 style={{ color: 'var(--color-error)', fontSize: '1.25rem' }}>Authentication Failed</h1>
+        <p style={{ color: 'var(--color-text-secondary)', margin: '1rem 0' }}>{errorMsg}</p>
+        <button className="btn btn-primary" onClick={() => location.replace('/login')}>Back to Login</button>
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────
    Navigation Config
    ────────────────────────────────────────────────── */
 interface NavItem {
@@ -147,8 +245,16 @@ function PageRouter({ page }: { page: string }) {
 /* ──────────────────────────────────────────────────
    Mount
    ────────────────────────────────────────────────── */
+function Root() {
+  // Intercept OAuth callback before rendering the full shell
+  if (location.pathname === '/oauth/callback') {
+    return <OAuthCallbackPage />;
+  }
+  return <AppShell />;
+}
+
 createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
-    <AppShell />
+    <Root />
   </QueryClientProvider>
 );
