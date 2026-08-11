@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenFloat Auth - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+            --color-brand-500: #00A650;
+            --color-brand-400: #2ebd6a;
+            --color-brand-300: #009144;
+            --color-surface-50: #f4f6f5;
+            --color-surface-card: #ffffff;
+            --color-border: rgba(0, 0, 0, 0.10);
+            --color-text-primary: #0d1f16;
+            --color-text-secondary: #3d5a4a;
+            --color-text-muted: #6b8a78;
+            --color-error: #dc2626;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.06);
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--font-sans);
+            background: var(--color-surface-50);
+            color: var(--color-text-primary);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .login-card {
+            background: var(--color-surface-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 3rem 2.5rem;
+            box-shadow: var(--shadow-card);
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .login-card h1 {
+            font-size: 1.75rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            margin: 0 0 0.5rem;
+            color: var(--color-brand-300);
+        }
+
+        .login-card p {
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin: 0 0 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            margin-bottom: 1.25rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .form-input {
+            background: #ffffff;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            color: var(--color-text-primary);
+            padding: 0.75rem 1rem;
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-brand-500);
+            box-shadow: 0 0 0 3px rgba(0, 166, 80, 0.15);
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            gap: 0.5rem;
+            padding: 0.85rem 1.25rem;
+            border: 0;
+            border-radius: var(--radius-md);
+            font-family: var(--font-sans);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            background: var(--color-brand-500);
+            color: white;
+            box-shadow: 0 2px 12px rgba(0, 166, 80, 0.30);
+            transition: all var(--transition-fast);
+            margin-top: 1rem;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-brand-400);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(0, 166, 80, 0.40);
+        }
+
+        .error-message {
+            background: rgba(220, 38, 38, 0.10);
+            color: var(--color-error);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .logout-message {
+            background: rgba(0, 166, 80, 0.10);
+            color: var(--color-brand-700);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h1>OpenFloat Auth</h1>
+        <p>Sign in to continue to the application.</p>
+        
+        <div th:if="${param.error}" class="error-message">
+            Invalid username or password.
+        </div>
+        
+        <div th:if="${param.logout}" class="logout-message">
+            You have been logged out.
+        </div>
+
+        <form th:action="@{/login}" method="post">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-input" required autofocus>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-input" required>
+            </div>
+            
+            <button type="submit" class="btn-primary">Sign In</button>
+        </form>
+    </div>
+</body>
+</html>

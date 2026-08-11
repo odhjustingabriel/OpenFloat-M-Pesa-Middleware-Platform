@@ -44,10 +44,13 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/login", "/error", "/actuator/**", "/openapi.json").permitAll()
+                .requestMatchers("/login", "/assets/**", "/error", "/actuator/**", "/openapi.json").permitAll()
                 .anyRequest().authenticated()
             )
-            .formLogin(Customizer.withDefaults()); // Form login handles the redirect from the authorization server
+            .formLogin(form -> form
+                .loginPage("/login")
+                .permitAll()
+            );
 
         return http.build();
     }
