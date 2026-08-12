@@ -73,14 +73,23 @@ public class AuthorizationServerConfig {
     }
 
     @Bean
-    public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer() {
+    public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer(
+            com.openfloat.mpesa.auth.repository.UserRepository userRepository,
+            org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
         return context -> {
             if (context.getTokenType().getValue().equals("access_token")) {
                 // Add roles to the claims if it's a user login
-                if (context.getPrincipal().getPrincipal() instanceof org.springframework.security.core.userdetails.User user) {
-                    context.getClaims().claim("roles", user.getAuthorities().stream()
+                if (context.getPrincipal().getPrincipal() instanceof org.springframework.security.core.userdetails.User springUser) {
+                    context.getClaims().claim("roles", springUser.getAuthorities().stream()
                             .map(auth -> auth.getAuthority())
                             .toList());
+                    
+                    // Check if they are using the default password
+                    userRepository.findByUsername(springUser.getUsername()).ifPresent(user -> {
+                        if (passwordEncoder.matches("123456789", user.getPasswordHash())) {
+                            context.getClaims().claim("requires_password_change", true);
+                        }
+                    });
                 } else {
                     // Client credentials flow: add client roles for system-to-system calls
                     context.getClaims().claim("roles", java.util.List.of("ROLE_ADMIN", "ROLE_OPERATOR", "ROLE_FINANCE"));

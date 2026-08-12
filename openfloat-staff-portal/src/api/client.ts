@@ -73,6 +73,17 @@ export const auth = {
   getRole(): string {
     return localStorage.getItem(ROLE_KEY) ?? 'STAFF';
   },
+
+  requiresPasswordChange(): boolean {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) return false;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.requires_password_change === true;
+    } catch {
+      return false;
+    }
+  },
 };
 
 /* ── PKCE Helpers ─────────────────────────────────── */

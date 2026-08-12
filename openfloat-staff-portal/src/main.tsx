@@ -16,6 +16,7 @@ import WebhookLogsPage from './pages/WebhookLogsPage';
 import ReconciliationPage from './pages/ReconciliationPage';
 import InvoicesPage from './pages/InvoicesPage';
 import BulkPayoutsPage from './pages/BulkPayoutsPage';
+import ChangePasswordModal from './components/ChangePasswordModal';
 
 import './styles.css';
 
@@ -171,6 +172,7 @@ function AppShell() {
 
   return (
     <div className="app-shell">
+      {auth.requiresPasswordChange() && <ChangePasswordModal />}
       {/* ─── Sidebar ─── */}
       <aside className="sidebar">
         <div className="sidebar-brand">

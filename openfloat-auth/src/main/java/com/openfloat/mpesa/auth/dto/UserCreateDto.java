@@ -22,7 +22,7 @@ public class UserCreateDto {
     @Email(message = "Invalid email format")
     private String email;
 
-    @NotBlank(message = "Password is required")
+    // Optional — if omitted, defaults to the system default "123456789"
     private String password;
 
     @NotNull(message = "Role is required")

@@ -22,7 +22,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 @SuppressWarnings("null")
 public class UserController {
 
@@ -30,6 +29,7 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<UserResponseDto>> createUser(@Valid @RequestBody UserCreateDto dto) {
         log.info("Admin creating user: {}", dto.getUsername());
         if (userRepository.existsByUsername(dto.getUsername())) {
@@ -42,7 +42,11 @@ public class UserController {
         User user = User.builder()
                 .username(dto.getUsername())
                 .email(dto.getEmail())
-                .passwordHash(passwordEncoder.encode(dto.getPassword()))
+                .passwordHash(passwordEncoder.encode(
+                        dto.getPassword() != null && !dto.getPassword().isBlank()
+                                ? dto.getPassword()
+                                : "123456789"
+                ))
                 .role(dto.getRole())
                 .status("ACTIVE")
                 .build();
@@ -52,6 +56,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<UserResponseDto>> getUser(@PathVariable UUID id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
@@ -59,6 +64,7 @@ public class UserController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<UserResponseDto>>> getAllUsers() {
         List<UserResponseDto> users = userRepository.findAll().stream()
                 .map(this::toResponseDto)
@@ -67,6 +73,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<UserResponseDto>> updateUserStatus(
             @PathVariable UUID id,
             @RequestParam String status) {
@@ -77,6 +84,27 @@ public class UserController {
         user.setStatus(status.toUpperCase());
         user = userRepository.save(user);
         return ResponseEntity.ok(ApiResponse.success(toResponseDto(user), "User status updated successfully"));
+    }
+
+    @PostMapping("/me/password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @Valid @RequestBody com.openfloat.mpesa.auth.dto.ChangePasswordDto dto,
+            org.springframework.security.core.Authentication authentication) {
+        
+        String username = authentication.getName();
+        log.info("User {} is changing their password", username);
+        
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
+
+        if (!passwordEncoder.matches(dto.getOldPassword(), user.getPasswordHash())) {
+            throw new IllegalArgumentException("Incorrect old password");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(user);
+
+        return ResponseEntity.ok(ApiResponse.success(null, "Password updated successfully"));
     }
 
     private UserResponseDto toResponseDto(User user) {
